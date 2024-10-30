@@ -1,0 +1,50 @@
+{
+    'name': 'Ishbik Integration With Odoo Hamilton ',
+    'version': '17.0',
+    'category': 'api',
+    'description': """
+    - Ishbik Integration With Odoo Hamilton 
+    """,
+    'summary': 'Ishbik Integration With Odoo Hamilton ',
+    'author': 'Ibraheem Areeda - HamiltonTech',
+    'website': 'https://www.hst.jo/',
+    'depends': ['point_of_sale', 'base', 'web'],
+    'license': 'LGPL-3',
+    'data': [
+        "security/ir.model.access.csv",
+        'views/ishbik_company.xml',
+        'views/ishbic_menu_categories_view.xml',  
+        'data/data_view.xml',
+        'views/pos_view.xml',
+        'views/pos_call_order_view.xml',
+    ],
+
+    'installable': True,
+    'auto_install': False,
+    'application': False,
+    'assets': {
+        'point_of_sale._assets_pos': [
+            'hst_ishbik_intgration/static/src/css/pos.css',
+            'hst_ishbik_intgration/static/src/css/datetime.css',
+            'hst_ishbik_intgration/static/src/js/model.js',
+            'hst_ishbik_intgration/static/src/js/Orderlinenote.js',
+            'hst_ishbik_intgration/static/src/js/CallOrderLine.js',
+            'hst_ishbik_intgration/static/src/js/OrderlineNotePopupWidget.js',
+            'hst_ishbik_intgration/static/src/js/Orderlist.js',
+            'hst_ishbik_intgration/static/src/js/TransferOrderButton.js',
+            'hst_ishbik_intgration/static/src/js/CreateTransferOrderPopupWidget.js',
+            'hst_ishbik_intgration/static/src/js/OrdersScreen.js',
+            'hst_ishbik_intgration/static/src/js/ReceiveOrderButton.js',
+            'hst_ishbik_intgration/static/src/js/PosCallOrdersDetail.js',
+            'hst_ishbik_intgration/static/src/js/ReceiveScreenWidget.js',
+            'hst_ishbik_intgration/static/src/js/ReceiveOrderLine.js',
+            'hst_ishbik_intgration/static/src/js/ReceiveOrderPrint.js',
+            'hst_ishbik_intgration/static/src/js/ReceiveOrderReceipt.js',
+            'hst_ishbik_intgration/static/src/js/TransferOrderReceipt.js',
+            'hst_ishbik_intgration/static/src/js/cancel_reason_popup.js',
+            'hst_ishbik_intgration/static/src/xml/pos.xml',
+            'hst_ishbik_intgration/static/src/xml/cancel_reason_popup.xml',
+        ],
+    },
+
+}

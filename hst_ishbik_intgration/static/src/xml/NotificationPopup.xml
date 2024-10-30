@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="hst_ishbik_intgration.NotificationPopup" owl="1">
+        <div class="notification_popup popup-NotificationPopup" style="right: 75px !important;width: 22%;top:0">
+            <main class="body">
+                 <div class="button cancel cancel_button" t-on-click="cancel">
+                    <i class="fa fa-times"/>
+                </div>
+                <div class="content" style="padding:1.5rem;">
+                    <div style="text-align:center;">
+                        <i class="fa fa-check"/>
+                        <span style="width: 100%;font-size: medium;margin-left:5px;"><strong><t t-esc="props.body"/></strong></span>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </t>
+</templates>

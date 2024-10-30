@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="hst_ishbik_intgration.OrderlineNote">
+        <button class="control-button btn btn-light rounded-0 fw-bolder" t-on-click="() => this.onClick()">
+            <i class="fa fa-sticky-note me-1" />
+            <span> </span>
+            <span>Line Note</span>
+        </button>
+    </t>
+
+    <t t-name="hst_ishbik_intgration.Orderlist">
+        <button class="control-button btn btn-light rounded-0 fw-bolder" t-on-click="() => this.onClick()">
+            <i class="fa fa-university" />
+            <span> </span>
+            <span>Orders</span>
+        </button>
+    </t>
+    <t t-name="hst_ishbik_intgration.TransferOrderButton">
+        <button class="control-button btn btn-light rounded-0 fw-bolder" t-on-click="() => this.onClick()">
+            <i class="fa fa-paper-plane" />
+            <span> </span>
+            <span>Transfer Order</span>
+        </button>
+    </t>
+
+    <t t-name="hst_ishbik_intgration.ReceiveOrderButton">
+        <button class="control-button btn btn-light rounded-0 fw-bolder" t-on-click="() => this.onClick()">
+            <i class="fa fa-get-pocket" />
+            <span> </span>
+            <span>Receive order</span>
+        </button>
+    </t>
+    <t t-name="hst_ishbik_intgration.OrderlineNotePopupWidget" owl="1">
+        <div class="popup popup-textarea">
+            <div class="modal-header">
+                <h4 class="modal-title"><t t-esc="props.title" /></h4>
+            </div>
+
+            <div class="modal-body">
+                <textarea class="popup-numpad" t-model="state.inputValue" t-ref="input"></textarea>
+                <div>
+                    <t t-if="props.order_line_note">
+                        <t t-foreach='props.order_line_note' t-as='line' t-key='line.id'>
+                            <div class="button" t-on-click="line_button"><t t-esc="line.name"/></div>
+                        </t>
+                    </t>
+                </div>
+            </div>
+
+            <footer class="footer footer-flex modal-footer">
+                <div class="button confirm highlight btn btn-lg btn-primary" t-on-click="confirm">
+                    Confirm
+                </div>
+                <div class="button cancel btn btn-lg btn-primary" t-on-click="cancel">
+                    Close
+                </div>
+            </footer>
+        </div>
+    </t>
+
+    <t t-name="Orderline" t-inherit="point_of_sale.Orderline" t-inherit-mode="extension" owl="1">
+        <xpath expr="//ul[hasclass('info-list')]" position="inside">
+            <t t-if="line.line_note">
+                <li class="info orderline-note">
+                    <i class="fa fa-tag" role="img" aria-label="Note" title="Note"/>
+                    <t t-esc="line.line_note" />
+                </li>
+            </t>
+        </xpath>
+    </t>
+
+    <t t-name="hst_ishbik_intgration.CreateTransferOrderPopupWidget" owl="1">
+        <div class="popup popup-import" style="height: 75%;">
+           <div class="modal-header drag-handle">
+                <h4 class="modal-title">Transfer Order</h4>
+            </div>
+            <main class="body modal-body" style="height: 75%;">
+                <div class="create_wrapper">
+                    <table id="create_coupon_table" class="table table-borderless">
+                        <tr>
+                            <td>
+                                <span style="font-weight: bold;font-size: large;">Order Date</span>
+                                <div class='input-group date'>
+                                    <input class="form-control form-control-lg w-75 mx-auto" type="date"  t-model="state.test_date" id="send_order_date" t-ref="input"/>
+                                </div>
+                            </td>
+                        </tr>
+                        <br/>
+                        <tr>
+                            <td>
+                                <span style="font-weight: bold;font-size: large;">Order Note</span>
+                                <span>
+                                    <input style="margin:8px auto;min-width: 95%;min-height: 40px;"  class="order_note" type="text"/>
+                                </span>
+                            </td>
+                        </tr>
+                        <br/>
+                        <tr>
+                            <td>
+                                <span style="font-weight: bold;font-size: large;">Order Branch</span>
+                                <span>
+                                    <select style="margin:8px auto;min-width: 86%;min-height: 40px;" class="order_session">
+                                            <t t-if="env.services.pos.sessions">
+                                            <t t-foreach="env.services.pos.sessions" t-as="session" t-key="session.id">
+                                                <option t-att-value="session.id">
+                                                    <t t-esc="session.name" />
+                                                </option>
+                                            </t>
+                                        </t>
+                                    </select>
+                                </span>
+                            </td>
+                        </tr>
+                        <br/>
+                        <tr>
+                            <td>
+                                <span style="font-weight: bold;font-size: large;">Order Priority</span>
+                                <select style="margin:8px auto;min-width: 95%;min-height: 40px;border-bottom-width: 1px;" class="order_priorty">
+                                    <option value="0">Low</option>
+                                    <option value="1">Normal</option>
+                                    <option value="2">Urgent</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <br/>
+                    </table>
+                </div>
+            </main>
+            <footer class="footer modal-footer">
+                <div class="button btn btn-lg btn-primary" t-on-click="send_order">
+                    Send Order
+                </div>
+                <div class="button btn btn-lg btn-primary" t-on-click="print_send_order">
+                    Send and Print 
+                </div>
+                <div class="button cancel btn btn-lg btn-primary" t-on-click="cancel">
+                    Close
+                </div>
+            </footer>
+        </div>
+    </t>
+
+    <t t-name="hst_ishbik_intgration.OrdersScreen" owl="1">
+         <div class="splitbill-screen screen h-100 bg-100">
+            <div class="contents d-flex flex-column flex-nowrap h-100 my-0 mx-auto">
+                <div class="top-content d-flex gap-2 align-items-center p-2 border-bottom text-center">
+                    <button class="button back btn btn-lg btn-outline-primary" t-on-click="back">
+                        <i class="fa fa-angle-double-left me-2"></i>
+                        <span>Discard</span>
+                    </button>
+                </div>
+                <section class="full-content">
+                    <div class="partner-window">
+                        <section class="overflow-auto">
+                            <table class="partner-list table table-striped w-100">
+                                <thead>
+                                    <tr class="odoo-theme-color">
+                                        <th>Order Ref.</th>
+                                        <th t-if="!env.isMobile">Customer Name</th>
+                                        <th t-if="!env.isMobile">Date</th>
+                                        <th>Total amount</th>
+                                        <th>Receiver</th>
+                                        <th>State</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="partner-list-contents">
+                                    <t t-foreach="call_orders" t-as="order"
+                                        t-key="order.id">
+                                        <CallOrderLine order="order" selectedCallOrder="state.selectedCallOrder"/>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </section>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </t>
+    <t t-name="hst_ishbik_intgration.CallOrderLine" owl="1">
+        <tr class='partner-line' t-att-data-id='props.order.id'>
+            <td><t t-esc='props.order.name'/></td>
+            <td><t t-if="props.order.partner_id"><t t-esc='props.order.partner_id[1]' /></t></td>
+            <td><t t-esc='props.order.delivery_date'/></td>
+            <td><t t-esc='env.utils.formatCurrency(props.order.amount_total)' /></td>
+            <td><t t-esc="props.order.branch_id[1]"/></td>
+            <td><t t-esc="props.order.state"/></td>
+            <td><div class="start fa fa-times" t-on-click="() => this.order_cancel(props.order.id)"/></td>
+        </tr>
+    </t>
+    <t t-name="hst_ishbik_intgration.PosCallOrdersDetail" owl="1">
+         <div class="popup popup-import" style="min-width: 70%;">
+            <div class="modal-header">
+                <h4 class="modal-title title drag-handle">
+                    Order Details
+                </h4>
+            </div>
+            <main class="body modal-body">
+                <t t-set="order" t-value="props.order || []"/>
+                <t t-log="order"/>
+                <table style='width:100%'>
+                    <tr class="popup-tr">
+                        <td style='width:20%; '><strong>Order Ref:</strong>
+                        </td>
+                        <td style='width:30%; '>
+                            <span t-esc="order['name']"/>
+                        </td>
+                        <td style='width:20%; '><strong>Delivery Date</strong>
+                        </td>
+                        <td style='width:30%; '>
+                            <span t-esc="get_order_date(order['delivery_date'])" />
+                        </td>
+                    </tr>
+                    <tr class="popup-tr">
+                        <td style='width:20%; '><strong>Customer:</strong>
+                        </td>
+                        <td style='width:30%; ' t-if="order['partner_name']">
+                            <span t-esc="order['partner_name'] or ''"/>
+
+                        </td>
+                        <td style='width:20%; '><strong>Total Amount:</strong>
+                        </td>
+                        <td style='width:30%; '>
+                            <span t-esc="env.utils.formatCurrency(order['amount_total'])" />
+                        </td>
+                    </tr>
+                    <tr class="popup-tr">
+                        <td style='width:20%; '><strong>Priority</strong>
+                        </td>
+                        <td style='width:30%; '>
+                            <t t-if="order['priority'] == 0">
+                                <span>Low</span>
+                            </t>
+                            <t t-if="order['priority'] == 1">
+                                <span>Normal</span>
+                            </t>
+                            <t t-if="order['priority'] == 2">
+                                <span>Urgent</span>
+                            </t>
+                        </td>
+                    </tr>
+                </table>
+                <br/>
+                <table style='width:100%'>
+                    <thead>
+                        <tr class="orderline-table-head">
+                            <th style='width:25%; padding-left: 10px; '>Product</th>
+                            <th style='width:25%; padding-left: 10px; '>Quantity</th>
+                            <th style='width:25%; padding-left: 10px; '>Discount</th>
+                            <th style='width:25%; padding-left: 10px; '>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="orderline-table" t-foreach="order['lines'] || []" t-as="line1" 
+                            t-key="line1.product_id">
+                            <td style='width:25%; padding-left: 10px; '><span t-esc='line1.product_name' /></td>
+                            <td style='width:25%; padding-left: 10px; '><span t-esc='line1.qty' /></td>
+                            <td style='width:25%; padding-left: 10px; '><span t-esc='line1.discount' /></td>
+                            <td style='width:25%; padding-left: 10px; '><span t-esc='(line1.price_subtotal_incl).toFixed(2)' /></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <br/>
+                <!-- <table style='width:100%'>
+                    <span style="font-family: 'Lato-Reg';font-size: 20px;font-weight: bold;">Order Transfer</span>
+                    <br/>
+                    <br/>
+                    <tr>
+                        <td>
+                            <select style="font-size: 20px; width:30%;" class="transfer_call_order">
+                                <option value="0"></option>
+                                <t t-if="env.services.pos.sessions">
+                                    <t t-foreach="env.services.pos.sessions" t-as="session1" t-key="session1.id">
+                                        <option t-att-value="session1.id">
+                                            <t t-esc="session1.name" />
+                                        </option>
+                                    </t>
+                                </t>
+                            </select>
+                        </td>
+                    </tr>
+                </table> -->
+            </main>
+            <footer class="footer modal-footer">
+                <div class="button cancel btn btn-lg btn-primary" t-on-click="cancel">
+                    Close
+                </div>
+                <div class="button new-customer highlight btn btn-lg btn-primary" t-on-click="() => this.deliver_order(order['id'])">
+                    Accept
+                </div>
+                <!-- <div class="button new-customer highlight btn btn-lg btn-primary" t-att-data-id="order['id']" t-on-click="transfer_order">
+                    Transfer
+                </div> -->
+            </footer>
+        </div>
+    </t>
+    <t t-name="hst_ishbik_intgration.ReceiveScreenWidget" owl="1">
+        <div class="splitbill-screen screen h-100 bg-100">
+            <div class="contents d-flex flex-column flex-nowrap h-100 my-0 mx-auto">
+                <div class="top-content d-flex gap-2 align-items-center p-2 border-bottom text-center">
+                    <button class="button back btn btn-lg btn-outline-primary" t-on-click="back">
+                        <i class="fa fa-angle-double-left me-2"></i>
+                        <span>Discard</span>
+                    </button>
+                </div>
+                <section class="full-content">
+                    <div class="partner-window">
+                        <section class="overflow-auto">
+                            <table class="partner-list table table-striped w-100">
+                                <thead>
+                                    <tr class="odoo-theme-color">
+                                        <th>Order Ref.</th>
+                                        <th t-if="!env.isMobile">Customer Name</th>
+                                        <th t-if="!env.isMobile">Date</th>
+                                        <th>Total amount</th>
+                                        <th>Priority</th>
+                                        <th>Receipt</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="partner-list-contents">
+                                    <t t-foreach="receive_orders" t-as="r_order" t-key="r_order.id">
+                                        <ReceiveOrderLine order="r_order" selectedReceiveOrder="state.selectedReceiveOrder" onClickShowOrder.bind="showDetails"/>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </section>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </t>
+    <t t-name="hst_ishbik_intgration.ReceiveOrderLine" owl="1">
+        <tr class='partner-line {{highlight}}' t-att-data-id='props.order.id'  t-on-click="() => this.props.onClickShowOrder(props.order)">
+            <td t-att-data-id='props.order.id' 
+                t-on-click.stop="() => props.onClickShowOrder(props.order)"
+                ><t t-esc='props.order.name'/></td>
+            <td t-att-data-id='props.order.id' 
+                t-on-click.stop="() => props.onClickShowOrder(props.order)"><t t-if="props.order.partner_name"><t t-esc='props.order.partner_name' /></t></td>
+            <td t-att-data-id='props.order.id' 
+                t-on-click.stop="() => props.onClickShowOrder(props.order)"><t t-esc="get_order_date(props.order.delivery_date)" /></td>
+            <td t-att-data-id='props.order.id' 
+                t-on-click.stop="() => props.onClickShowOrder(props.order)"><t t-esc="env.utils.formatCurrency(props.order.amount_total)" /></td>
+            <t t-if="props.order.priority == 0">
+                <td>Low</td>
+            </t>
+            <t t-if="props.order.priority == 1">
+                <td>Normal</td>
+            </t>
+            <t t-if="props.order.priority == 2">
+                <td>Urgent</td>
+            </t>
+            <td class="print-order" t-att-data-id='props.order.id' t-on-click="() => this.clickReprint(props.order)">
+                <button class="odoo-theme-button"><i class="fa fa-print"></i>Print</button>
+            </td>
+        </tr>
+    </t>
+
+    <t t-name="hst_ishbik_intgration.ReceiveOrderPrint" owl="1">
+        <div class="receipt-screen screen h-100 bg-100">
+            <div class="receipt-screen screen h-100 bg-100">
+                <div class="screen-content d-flex flex-column h-100">
+                    <div class="top-content d-flex align-items-center py-3 border-bottom text-center" >
+                        <div class="top-content-center flex-grow-1">
+                            <h1 class="mb-0">
+                                Reprint Order
+                            </h1>
+                        </div>
+                        <div class="top-content d-flex gap-2 align-items-center p-2 border-bottom text-center">
+                            <button class="button back btn btn-lg btn-outline-primary" t-on-click="back">
+                                <i class="fa fa-angle-double-left me-2"></i>
+                                <span>Discard</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="default-view d-flex flex-lg-row flex-column overflow-hidden flex-grow-1">
+                        <div class="actions d-flex flex-column justify-content-between flex-lg-grow-1 flex-grow-0 flex-shrink-1 flex-basis-0">
+                            <div class="d-flex flex-column m-4">
+                                <div class="buttons my-3">
+                                    <button class="button print btn btn-lg btn-secondary w-100 py-3" t-on-click="printReceipt">
+                                        <i class="fa fa-print ms-2" t-ref="order-print-receipt-button"></i> Print Receipt
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pos-receipt-container d-flex flex-grow-1 flex-lg-grow-0 user-select-none justify-content-center bg-200 text-center overflow-hidden">
+                            <div class="d-inline-block m-3 p-3 border rounded bg-view text-start overflow-y-auto">
+                                <t t-log="props"/>
+                                <ReceiveOrderReceipt 
+                                    order="props.order"
+                                    discount = "props.discount"
+                                    orderlines = "props.orderlines"
+                                    subtotal = "props.subtotal" 
+                                    tax = "props.tax"   
+                                    formatCurrency="env.utils.formatCurrency"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="hst_ishbik_intgration.ReceiveOrderReceipt" owl="1">
+        <div class="pos-receipt">
+            <img t-attf-src="/web/image?model=res.company&amp;id={{pos.company.id}}&amp;field=logo" alt="Logo" class="pos-receipt-logo"/>
+	        <br/>
+	        <h1 class="tracking-number text-center" style="font-size: 100px" t-if="pos.trackingNumber and pos.bigTrackingNumber" t-esc="pos.trackingNumber" />
+	        <div class="pos-receipt-contact">
+	            <div t-if="pos.company.partner_id?.[1]" t-esc="pos.company.partner_id[1]" />
+	            <t t-if="pos.company.phone">
+	                <div>Tel:<t t-esc="pos.company.phone" /></div>
+	            </t>
+	            <t t-if="pos.company.vat">
+	                <div><t t-esc="pos.company.country?.vat_label || 'Tax ID'"/>: <t t-esc="pos.company.vat" /></div>
+	            </t>
+	            <div t-if="pos.company.email" t-esc="pos.company.email" />
+	            <div t-if="pos.company.website" t-esc="pos.company.website" />
+	            <div t-if="pos.header" style="white-space:pre-line" t-esc="pos.header" />
+	            <div t-if="pos.cashier" class="cashier">
+	                <div>--------------------------------</div>
+	                <div>Served by <t t-esc="pos.cashier" /></div>
+	            </div>
+	        </div>
+	        <br /><br />
+
+            <div class='orderlines'>
+				<t t-foreach='props.orderlines' t-as='line' t-key="line.id">
+					<t t-set='simple' t-value='(line.discount === 0 and line.qty === 1)' />
+					<div t-if='simple'>
+						<t t-esc="line.product_name"/>
+						<span t-esc='props.formatCurrency(line.total_price)' class="price_display pos-receipt-right-align"/>
+					</div>
+					<t t-if='!simple'>
+						<div t-esc='line.product_name'/>
+						<t t-if='line.discount !== 0'>
+							<div class="pos-receipt-left-padding">
+								<t t-esc="props.formatCurrency(line.price_unit)"/>
+							</div>
+							<div class="pos-receipt-left-padding">
+								Discount: <t t-esc='line.discount' />%
+							</div>
+						</t>
+						<div class="pos-receipt-left-padding">
+							<t t-esc="Math.round(line.qty)"/>
+							x
+							<t t-esc='props.formatCurrency(line.total_price/line.qty)' />
+							<span class="price_display pos-receipt-right-align">
+								<t t-esc='props.formatCurrency(line.total_price)'/>
+							</span>
+						</div>
+					</t>
+				</t>
+			</div>
+            <div class="pos-receipt-right-align"></div>
+            <br/>
+            <div class="pos-receipt-amount">
+                TOTAL
+                <span t-esc="props.formatCurrency(props.order.amount_total)" class="pos-receipt-right-align"/>
+            </div>
+            <br/><br/>
+
+            <t t-if="props.discount">
+                <div>
+                    Discounts
+                    <span t-esc="props.formatCurrency(props.discount)" class="pos-receipt-right-align"/>
+                </div>
+            </t>
+            <div class='before-footer' />
+            <br/>
+            <div class="pos-receipt-order-data">
+                <div><t t-esc='props.order.pos_reference' /></div>
+                <div><t t-esc='props.order.date_order' /></div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="hst_ishbik_intgration.TransferOrderReceipt" owl="1">
+        <div class="receipt-screen screen h-100 bg-100">
+            <div class="receipt-screen screen h-100 bg-100">
+                <div class="screen-content d-flex flex-column h-100">
+                    <div class="top-content d-flex align-items-center py-3 border-bottom text-center" >
+                        <div class="top-content-center flex-grow-1">
+                            <h1 class="mb-0">
+                                Transfer Order Receipt
+                            </h1>
+                        </div>
+                        <div class="top-content d-flex gap-2 align-items-center p-2 border-bottom text-center">
+                            <button class="button back btn btn-lg btn-outline-primary" t-on-click="go_confirm">
+                                <i class="fa fa-angle-double-left me-2"></i>
+                                <span>Discard</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="default-view d-flex flex-lg-row flex-column overflow-hidden flex-grow-1">
+                        <div class="actions d-flex flex-column justify-content-between flex-lg-grow-1 flex-grow-0 flex-shrink-1 flex-basis-0">
+                            <div class="d-flex flex-column m-4">
+                                <div class="buttons my-3">
+                                    <button class="button print btn btn-lg btn-secondary w-100 py-3" t-on-click="printReceipt">
+                                        <i class="fa fa-print ms-2" t-ref="order-print-receipt-button"></i> Print Receipt
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pos-receipt-container d-flex flex-grow-1 flex-lg-grow-0 user-select-none justify-content-center bg-200 text-center overflow-hidden">
+                            <div class="d-inline-block m-3 p-3 border rounded bg-view text-start overflow-y-auto">
+                                <OrderReceipt data="pos.get_order().export_for_printing()" formatCurrency="env.utils.formatCurrency" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="OrderReceipt" t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('after-footer')]" position="after">
+            <br/>
+            <t t-if="env.services.pos.get_order().call_order_id">
+                Order Ref: <t t-esc="env.services.pos.get_order().call_order_id"/>
+            </t>
+            <br/>
+        </xpath> 
+    </t>
+</templates>

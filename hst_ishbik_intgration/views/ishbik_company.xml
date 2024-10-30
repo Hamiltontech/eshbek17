@@ -1,0 +1,125 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="res_company_inherit_hst_ishbik_intgration" model="ir.ui.view">
+        <field name="name">res.company.extra.view.form.inherit</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <field name="company_registry" position="after">
+                <field name="is_connected_to_ishbic"/>
+            </field>
+        </field>
+    </record>
+
+<record id="pos_config_inherit_hst_ishbik_intgration" model="ir.ui.view">
+    <field name="name">pos.config.form.inherit</field>
+    <field name="model">pos.config</field>
+    <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+    <field name="arch" type="xml">
+            <xpath expr="//div[@groups='base.group_system']" position="before">
+                <field name="is_company_connected_to_ishbic" invisible="1"/>
+                 <setting string="Ishbic" help="Connect This point of sale to Ishbic" invisible="not is_company_connected_to_ishbic">
+                        <field name="is_connected_to_ishbic"/>
+                        <div class="content-group pos_iot_config" invisible="not is_connected_to_ishbic">
+                            <div class="row">
+                                <label string="Phone Number" for="phone_number" class="col-lg-4 o_light_label"/>
+                                <field name="phone_number"/>
+                            </div>
+                            <div class="row working_from">
+                                <label string="Working From" for="working_from" class="col-lg-4 o_light_label"/>
+                                <field name="working_from" widget="float_time"/>
+                            </div>
+                            <div class="row">
+                                <label string="Working To" for="working_to" class="col-lg-4 o_light_label"/>
+                                <field name="working_to" widget="float_time"/>
+                            </div>
+                        </div>
+                    </setting>
+                    <notebook invisible="not is_connected_to_ishbic">
+                        <page name="unavailable_products" string="Unavailable Products">
+                            <tree string="unavailable_products" editable="bottom">
+                                <field name="product_template_ids" domain="[('available_in_pos', '=', True)]"/>
+                            </tree>
+                        </page>
+                    </notebook>
+            </xpath>
+    </field>
+</record>
+
+<record id="product_template_hst_ishbik_intgration" model="ir.ui.view">
+    <field name="name">product.template.form.inherit</field>
+    <field name="model">product.template</field>
+    <field name="inherit_id" ref="product.product_template_only_form_view"/>
+    <field name="arch" type="xml">
+        <xpath expr="//form[@name='Product Template']/sheet[@name='product_form']/notebook[1]" position="inside">
+            <page name="ishbik" string="Ishbik Configuration">
+                <group>
+                    <group string="Pricing">
+                        <field name="online" />
+                        <field name="careem" />
+                        <field name="talabat"/>
+                        <field name="callcenter"/>
+                        <field name="mobile"/>
+                    </group>
+                    <group string="Product Costs">
+                        <field name="cost" />
+                        <field name="ishbic_tax" widget="percentage"/>
+                    </group >
+                    <group string="Ishbic Product Category" colspan="2">
+                        <field name="ishbic_menu_category_id" required="1"/>
+                    </group>
+                </group>
+            </page>
+        </xpath>
+    </field>
+</record>
+
+<record id="product_attribute_hst_ishbik_intgration" model="ir.ui.view">
+    <field name="name">product.attribute.form.inherit</field>
+    <field name="model">product.attribute</field>
+    <field name="inherit_id" ref="product.product_attribute_view_form"/>
+    <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="name_ar"/>
+            </field>
+            <field name="display_type" position="after">
+                <field name="minimum_selection" invisible="display_type != 'multi'" />
+                <field name="maximum_selection" invisible="display_type != 'multi'" />
+            </field>
+            <xpath expr="//form/sheet/notebook" position="inside">
+                <page name="ishbik_product_attribute_desc" string="Attribute Description">
+                    <group string="Modifire Group Description">
+                        <group>
+                        <field  name="description"  placeholder="This note is only for internal purposes."/>
+                        </group>
+                        <group>
+                        <field  name="description_ar"  placeholder="This note is only for internal purposes."/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+             <xpath expr="//form/sheet/notebook/page[@name='attribute_values']" position="replace">
+                <page name="ishbik_product_attribute_values" string="Attribute Values">
+                    <field name="value_ids" widget="one2many">
+                            <tree string="Values" editable="bottom">
+                                <field name="sequence" widget="handle" />
+                                <field name="name"/>
+                                <field name="display_type" column_invisible="True"/>
+                                <field name="html_color" column_invisible="parent.display_type != 'color'" invisible="image" widget="color"/>
+                                <field name="image" class="oe_avatar text-start float-none" column_invisible="parent.display_type != 'color'" options="{'size': [70, 70]}" widget="image"/>
+                                <field name="default_extra_price"/>
+                                <field name="online" />
+                                <field name="careem" />
+                                <field name="talabat"/>
+                                <field name="callcenter"/>
+                                <field name="mobile"/>
+                                <field name="description"/>
+                                <field name="description_ar"/>
+                            </tree>
+                    </field>
+                </page>
+            </xpath>
+    </field>
+</record>
+
+</odoo>

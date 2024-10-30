@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ishbic_menu_category,ishbic_menu_category,model_ishbic_menu_category,,1,1,1,0
+access_pos_call_order,pos.call.order,model_pos_call_order,,1,1,1,1
+access_pos_call_order_line,pos.call.order.line,model_pos_call_order_line,,1,1,1,1

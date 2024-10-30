@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="pos_call_order_action" model="ir.actions.act_window">
+            <field name="name">POS Call Orders</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">pos.call.order</field>
+            <field name="view_mode">tree,form</field>                   
+        </record>
+
+
+        <record id="pos_call_order_view_form" model="ir.ui.view">
+            <field name="name">pos.call.order.form</field>
+            <field name="model">pos.call.order</field>
+            <field name="arch" type="xml">
+                <form string="Quotations" edit="0" create="0">
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                    </header>
+                    <sheet>
+                    <group col="4" colspan="4" name="order_fields">
+                        <field name="name"/>
+                        <field name="delivery_date"/>
+                        <field name="partner_id"/>
+                        <field name="pricelist_id"/>
+                        <field name="branch_id" domain="[('is_branch','=',True)]"/>
+                        <!-- <field name="cancel_reason"/> -->
+                    </group>
+                    <notebook colspan="4">
+                        <page string="Products">
+                            <field name="lines" colspan="4" nolabel="1" >
+                                <tree string="Quotations lines" editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="qty"/>
+                                    <field name="price_unit"/>
+                                    <field name="discount"/>
+                                    <field name="tax_ids" column_invisible="True"/>
+                                    <field name="tax_ids_after_fiscal_position" widget="many2many_tags" string="Taxes"/>
+                                    <field name="price_subtotal"/>
+                                    <field name="price_subtotal_incl"/>
+                                    <field name="combo_prod_ids" widget="many2many_tags"/>
+                                </tree>
+                            </field>
+                            <group class="oe_subtotal_footer" colspan="2" name="order_total">
+                                <field name="amount_tax" force_save="1"
+                                widget="monetary"/>
+                                <div class="oe_subtotal_footer_separator oe_inline o_td_label">
+                                    <label for="amount_total" />
+                                    <button name="button_dummy"
+                                            string="(update)" class="oe_edit_only oe_link"/>
+                                </div>
+                                <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary"/>
+                            </group>
+                            <div class="clearfix"/>
+                        </page>
+                        <!-- <page string="Notes" >
+                            <field name="note"/>
+                        </page> -->
+                    </notebook>
+                </sheet>               
+                </form>
+            </field>
+        </record>               
+        <record id="pos_call_order_view_tree" model="ir.ui.view">
+            <field name="name">pos.call.order.tree</field>
+            <field name="model">pos.call.order</field>
+            <field name="arch" type="xml">
+                <tree string="Quotations" create="0">
+                    <field name="name"/>
+                    <field name="partner_id"/>
+                    <field name="amount_total" sum="Amount total"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+       <menuitem name="POS Call Orders" id="menu_pos_call_orders" parent="point_of_sale.menu_point_of_sale" 
+        action="pos_call_order_action" sequence="2"/>
+    </data>
+</odoo>
