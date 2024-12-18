@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_company_inherit_res_company" model="ir.ui.view">
+        <field name="name">base.res_config_settings_view_form</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <page name="general_info" position="after">
+                <page name="wathq_integration" string="Wathq Integration">
+                        <center>
+                            <img src="https://developer.wathq.sa/sites/default/themes/custom/wathq_theme/logo.svg" width="100px" alt="Wathq"/><br></br>
+                        </center>            
+                        <group>
+                        <group string="Integration">
+                            <field name="apiKey" required="1"/>
+                        </group>
+                    </group>
+                    <p><strong>Extra Information</strong></p>
+                        <p><a href="https://developer.wathq.sa/en/register/form">Sign up with Wathq</a></p>
+                        <p><a href="https://www.hst.jo/wathq-odoo">Integration Documentation</a></p>
+                        <p><a href="https://developer.wathq.sa/en/Pricing">Wathq Packages</a></p>
+                        <p><a href="https://www.hst.jo/contactus">Need Help ? </a></p>
+                </page>
+            </page>
+        </field>
+    </record>
+
+</odoo>

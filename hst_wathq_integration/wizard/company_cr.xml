@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+   <record id="whatsapp_send_message_view_form" model="ir.ui.view">
+       <field name="name">company.cr.number.view.form</field>
+       <field name="model">company.cr.number</field>
+       <field name="priority" eval="8"/>
+       <field name="arch" type="xml">
+           <form string="Whatsapp Message">
+               <group>
+                   <field name="cr_number" required="1"/>
+               </group>
+               <footer>
+                   <button name="action_send_to_wathq" string="Confirm" type="object"/>
+                   <button name="cancel" string="Cancel" special="cancel"/>
+               </footer>
+           </form>
+       </field>
+   </record>
+</odoo>

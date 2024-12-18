@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_partner_extra_inherit_res_partner" model="ir.ui.view">
+        <field name="name">res.partner.extra.view.form.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form" />
+        <field name="arch" type="xml">
+
+            <xpath expr="//form//sheet" position="before">
+                <header>
+                    <button string="Get Contact From Wathq" name="action_get_cr_number" type="object"    invisible="not is_company or wathq_confirmation == 'confirmed'" />
+                    <field name="wathq_confirmation"  widget="statusbar" statusbar_visible="not_confirmed,confirmed"/>
+                </header>
+            </xpath>
+            <field name="vat" position="after">
+                    <field name="cr_number" />
+                    <field name="crEntityNumber"  invisible="not is_company"/>
+                    <field name="company_status" />
+                    <field name="description" invisible="not is_company" />
+                    <field name="description_ar" invisible="not is_company" />
+                    <filed name="verified" invisible="1" />
+
+            </field>
+        </field>
+    </record>
+
+</odoo>
