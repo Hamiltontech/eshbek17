@@ -106,6 +106,8 @@ class POSCallOrders(models.Model):
 	company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True)
 	pos_cancel_reason = fields.Text(string="Cancel Reason")
 	pos_cancel_by = fields.Many2one('res.users', string='Cancelled By')
+	payment_method_id = fields.Many2one('pos.payment.method', string='Payment Method', required=True)
+	
 
 	def cancel_order(self, order, reason_text):
 		order = self.env['pos.call.order'].sudo().browse(order)
@@ -152,9 +154,11 @@ class POSCallOrders(models.Model):
 	def get_pos_order(self, order_id):
 		call_order_obj = self.browse(int(order_id))
 		if call_order_obj:
+			print(f"??????????????? {call_order_obj.payment_method_id.name}")
 			return {
 				'partner_id':call_order_obj.partner_id.id,
 				'name':call_order_obj.name,
+				'payment_method':call_order_obj.payment_method_id.name,
 				'orderline':call_order_obj.lines.read(['product_id','price_unit','qty','discount','tax_ids','combo_prod_ids','line_flag','price_subtotal_incl','price_subtotal','attribute_value_ids','price_extra','customer_note']), #here
 			}
 		return False

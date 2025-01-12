@@ -20,7 +20,7 @@ export class ReceiveScreenWidget extends Component {
     }
     back() {
         var self = this;
-        self.env.services.pos.closeTempScreen();
+        self.env.services.pos.showScreen("ProductScreen")
     }
     get receive_orders(){
         let self = this;

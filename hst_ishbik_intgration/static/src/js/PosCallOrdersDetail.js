@@ -55,7 +55,7 @@ export class PosCallOrdersDetail extends AbstractAwaitablePopup {
         });
     }
   }
-  deliver_order(event) {
+  deliver_order(event) {                    //here we are starting the cycle
     var self = this;
     var order_id = event;
     var order = self.env.services.pos.get_order();
@@ -65,27 +65,35 @@ export class PosCallOrdersDetail extends AbstractAwaitablePopup {
         .call("pos.call.order", "order_deliver", [order_id])
         .then(function (order_data) {
           var receive_order = self.env.services.pos.received_orders;
+
           for (var j = 0; j < receive_order.length; j++) {
             if (receive_order[j].id == order_id) {
               self.env.services.pos.received_orders.splice(j, 1);
               break;
             }
           }
+
           var order = self.env.services.pos.get_order();
+          console.log(888888888888888,order);
+          
           var orderlines = order.get_orderlines();
           console.log(
             "from js after calling order.get_orderlines()",
             orderlines
           );
+
+
           if (orderlines.length == 0) {
             self.env.services.orm
-              .call("pos.call.order", "get_pos_order", [order_id])
-              .then(function (result) {
-                console.log(
-                  "from js after calling get_pos_order in py model",
-                  result
-                );
+            .call("pos.call.order", "get_pos_order", [order_id])
+            .then(function (result) {                                             //here our logic starts for payment method
+              console.log(
+                "from js after calling get_pos_order in py model",
+                result
+              );
+                // order.payment_method = 
                 order.partner = undefined;
+                // order.add_paymentline(result['payment_method']);
                 order.call_order_id = result["name"];
                 order.call_id = order_id;
                 if (result["partner_id"]) {
@@ -157,10 +165,17 @@ export class PosCallOrdersDetail extends AbstractAwaitablePopup {
                       }); //manipulate here when adding the product
                     }
                   }
+
                 }
+                if (result["payment_method"] == "Cash") {
                 self.cancel();
                 self.env.services.pos.closeTempScreen();
-                self.env.services.pos.showScreen("ProductScreen");
+                self.env.services.pos.showScreen("IshbikPaymentScreen");
+                } else {
+                  self.cancel();
+                  self.env.services.pos.closeTempScreen();
+                  self.env.services.pos.showScreen("ReceiveScreenWidget");
+                }
               });
           }
         });

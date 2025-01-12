@@ -44,6 +44,15 @@
             'hst_ishbik_intgration/static/src/js/cancel_reason_popup.js',
             'hst_ishbik_intgration/static/src/xml/pos.xml',
             'hst_ishbik_intgration/static/src/xml/cancel_reason_popup.xml',
+            'hst_ishbik_intgration/static/src/ishbik_payment_screen/ishbik_payment_lines/ishbik_payment_lines.js',
+            'hst_ishbik_intgration/static/src/ishbik_payment_screen/ishbik_payment_lines/ishbik_payment_lines.scss',
+            'hst_ishbik_intgration/static/src/ishbik_payment_screen/ishbik_payment_lines/ishbik_payment_lines.xml',
+            'hst_ishbik_intgration/static/src/ishbik_payment_screen/ishbik_payment_status/ishbik_payment_status.js',
+            'hst_ishbik_intgration/static/src/ishbik_payment_screen/ishbik_payment_status/ishbik_payment_status.scss',
+            'hst_ishbik_intgration/static/src/ishbik_payment_screen/ishbik_payment_status/ishbik_payment_status.xml',
+            'hst_ishbik_intgration/static/src/ishbik_payment_screen/ishbik_payment_screen.js',
+            'hst_ishbik_intgration/static/src/ishbik_payment_screen/ishbik_payment_screen.scss',
+            'hst_ishbik_intgration/static/src/ishbik_payment_screen/ishbik_payment_screen.xml'
         ],
     },
 

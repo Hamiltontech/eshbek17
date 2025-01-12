@@ -93,7 +93,6 @@ class OrderIntegration(http.Controller):
             response=json.dumps({
                                 "status": "failed",
                                 "message": f"this branch is currently closed there is no active session for branch with id = {store_id}"}, default=str))
-
         order.update({
             'branch_id':pos_config[0]['id'],
             'session_id': session_id[0],
@@ -109,11 +108,32 @@ class OrderIntegration(http.Controller):
             'note':'from api',
             'priority':2,
             'grubtech_order_id':order['id']
+            
                               })
+        payment_method_id = request.env['pos.payment.method'].search([('name','=',order.get('payment',{}).get('method','').capitalize())])
+        if not payment_method_id:
+            return werkzeug.wrappers.Response(
+            status=400,
+            content_type="application/json; charset=utf-8",
+            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache"),("Access-Control-Allow-Origin","*"),("Access-Control-Allow-Headers","*")],
+            response=json.dumps({
+                                "status": "failed",
+                                "message": f"Payment method = \'{order.get('payment',{}).get('method','None').capitalize()}\' not found in the system [Not Case sensitive]"}, default=str))
         print("$$$$$$$$$$$$$$$",order)
         self.logger.info(f"pos_call_order_data*************{order}")
         pos_order = request.env['pos.call.order'].create_pos_call_order(request.env['pos.call.order']._order_fields(order))
-        print(11111111111,pos_order)
+        print(F"\n ORDER ID{pos_order} \n")
+        pos_order_result = pos_order['result'][0]
+        
+        # create pos payment and fill the payment method id form payment object >> method
+            
+        print(F"\n payment_method_id {payment_method_id.id} \n")
+        
+
+        pos_call_order_record = request.env['pos.call.order'].browse(pos_order_result['id'])
+        pos_call_order_record.write({"payment_method_id":payment_method_id.id})
+        print(F"\n ORDER ID{pos_call_order_record} \n")
+        
         res = {}
         res['ishbic_order_id'] = order['id']
         res['odoo_order_id'] = pos_order['result'][0]['id']

@@ -27,7 +27,7 @@ export class ReceiveOrderButton extends Component {
         }
         console.log(8888888,self.env.services.pos);
         
-        self.env.services.pos.showTempScreen("ReceiveScreenWidget");
+        self.env.services.pos.showScreen("ReceiveScreenWidget")
 
       });
   }
