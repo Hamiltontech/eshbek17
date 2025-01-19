@@ -39,8 +39,9 @@ export class IshbikPaymentScreen extends Component {
         this.hardwareProxy = useService("hardware_proxy");
         this.printer = useService("printer");
         this.payment_methods_from_config = this.pos.payment_methods.filter((method) =>
-            method.name == "Cash"
+            method.name == "Cash" || method.name == "Bank"
         );
+        
         console.log(3333333333333333,this.pos.payment_methods);
         
         this.numberBuffer = useService("number_buffer");

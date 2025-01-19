@@ -286,7 +286,7 @@
                     Close
                 </div>
                 <div class="button new-customer highlight btn btn-lg btn-primary" t-on-click="() => this.deliver_order(order['id'])">
-                    Accept
+                    Food Is Ready
                 </div>
                 <!-- <div class="button new-customer highlight btn btn-lg btn-primary" t-att-data-id="order['id']" t-on-click="transfer_order">
                     Transfer
