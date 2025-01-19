@@ -172,6 +172,7 @@ export class PosCallOrdersDetail extends AbstractAwaitablePopup {
                 self.env.services.pos.closeTempScreen();
                 self.env.services.pos.showScreen("IshbikPaymentScreen");
                 } else {
+                  console.log("orrrrrrrrrrrrrder",self);
                   self.cancel();
                   self.env.services.pos.closeTempScreen();
                   self.env.services.pos.showScreen("ReceiveScreenWidget");
