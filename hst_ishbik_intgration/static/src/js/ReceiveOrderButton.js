@@ -21,12 +21,9 @@ export class ReceiveOrderButton extends Component {
       .then(function (order_data) {
         self.env.services.pos.received_orders = [];
         var rec_data = order_data["data"];
-        console.log(11111111111,rec_data);
         for (var k = 0; k < rec_data.length; k++) {
           self.env.services.pos.received_orders.push(rec_data[k]);
         }
-        console.log(8888888,self.env.services.pos);
-        
         self.env.services.pos.showScreen("ReceiveScreenWidget")
 
       });

@@ -188,6 +188,7 @@
             <td><div class="start fa fa-times" t-on-click="() => this.order_cancel(props.order.id)"/></td>
         </tr>
     </t>
+
     <t t-name="hst_ishbik_intgration.PosCallOrdersDetail" owl="1">
          <div class="popup popup-import" style="min-width: 70%;">
             <div class="modal-header">
@@ -261,25 +262,6 @@
                     </tbody>
                 </table>
                 <br/>
-                <!-- <table style='width:100%'>
-                    <span style="font-family: 'Lato-Reg';font-size: 20px;font-weight: bold;">Order Transfer</span>
-                    <br/>
-                    <br/>
-                    <tr>
-                        <td>
-                            <select style="font-size: 20px; width:30%;" class="transfer_call_order">
-                                <option value="0"></option>
-                                <t t-if="env.services.pos.sessions">
-                                    <t t-foreach="env.services.pos.sessions" t-as="session1" t-key="session1.id">
-                                        <option t-att-value="session1.id">
-                                            <t t-esc="session1.name" />
-                                        </option>
-                                    </t>
-                                </t>
-                            </select>
-                        </td>
-                    </tr>
-                </table> -->
             </main>
             <footer class="footer modal-footer">
                 <div class="button cancel btn btn-lg btn-primary" t-on-click="cancel">
@@ -288,21 +270,26 @@
                 <div class="button new-customer highlight btn btn-lg btn-primary" t-on-click="() => this.deliver_order(order['id'])">
                     Food Is Ready
                 </div>
-                <!-- <div class="button new-customer highlight btn btn-lg btn-primary" t-att-data-id="order['id']" t-on-click="transfer_order">
-                    Transfer
-                </div> -->
             </footer>
         </div>
     </t>
+
     <t t-name="hst_ishbik_intgration.ReceiveScreenWidget" owl="1">
         <div class="splitbill-screen screen h-100 bg-100">
             <div class="contents d-flex flex-column flex-nowrap h-100 my-0 mx-auto">
-                <div class="top-content d-flex gap-2 align-items-center p-2 border-bottom text-center">
-                    <button class="button back btn btn-lg btn-outline-primary" t-on-click="back">
-                        <i class="fa fa-angle-double-left me-2"></i>
-                        <span>Discard</span>
-                    </button>
-                </div>
+                    <div class="top-content d-flex align-items-center py-3 border-bottom text-center" >
+                        <div class="top-content-center flex-grow-1">
+                            <h1 class="mb-0">
+                                Ishbic Orders
+                            </h1>
+                        </div>
+                        <div class="top-content d-flex gap-2 align-items-center p-2 border-bottom text-center">
+                            <button class="button back btn btn-lg btn-outline-primary" t-on-click="back">
+                                <i class="fa fa-angle-double-left me-2"></i>
+                                <span>Discard</span>
+                            </button>
+                        </div>
+                    </div>
                 <section class="full-content">
                     <div class="partner-window">
                         <section class="overflow-auto">
@@ -329,31 +316,44 @@
             </div>
         </div>
     </t>
-    <t t-name="hst_ishbik_intgration.ReceiveOrderLine" owl="1">
-        <tr class='partner-line {{highlight}}' t-att-data-id='props.order.id'  t-on-click="() => this.props.onClickShowOrder(props.order)">
-            <td t-att-data-id='props.order.id' 
-                t-on-click.stop="() => props.onClickShowOrder(props.order)"
-                ><t t-esc='props.order.name'/></td>
-            <td t-att-data-id='props.order.id' 
-                t-on-click.stop="() => props.onClickShowOrder(props.order)"><t t-if="props.order.partner_name"><t t-esc='props.order.partner_name' /></t></td>
-            <td t-att-data-id='props.order.id' 
-                t-on-click.stop="() => props.onClickShowOrder(props.order)"><t t-esc="get_order_date(props.order.delivery_date)" /></td>
-            <td t-att-data-id='props.order.id' 
-                t-on-click.stop="() => props.onClickShowOrder(props.order)"><t t-esc="env.utils.formatCurrency(props.order.amount_total)" /></td>
-            <t t-if="props.order.priority == 0">
-                <td>Low</td>
+
+<t t-name="hst_ishbik_intgration.ReceiveOrderLine" owl="1">
+    <tr class='partner-line {{highlight}}' t-att-data-id='props.order.id' t-on-click="() => this.props.onClickShowOrder(props.order)">
+        <td t-att-data-id='props.order.id' 
+            t-on-click.stop="() => props.onClickShowOrder(props.order)">
+            <t t-esc='props.order.name'/>
+        </td>
+        <td t-att-data-id='props.order.id' 
+            t-on-click.stop="() => props.onClickShowOrder(props.order)">
+            <t t-if="props.order.partner_name">
+                <t t-esc='props.order.partner_name' />
             </t>
-            <t t-if="props.order.priority == 1">
-                <td>Normal</td>
-            </t>
-            <t t-if="props.order.priority == 2">
-                <td>Urgent</td>
-            </t>
-            <td class="print-order" t-att-data-id='props.order.id' t-on-click="() => this.clickReprint(props.order)">
-                <button class="odoo-theme-button"><i class="fa fa-print"></i>Print</button>
-            </td>
-        </tr>
-    </t>
+        </td>
+        <td t-att-data-id='props.order.id' 
+            t-on-click.stop="() => props.onClickShowOrder(props.order)">
+            <t t-esc="get_order_date(props.order.delivery_date)" />
+        </td>
+        <td t-att-data-id='props.order.id' 
+            t-on-click.stop="() => props.onClickShowOrder(props.order)">
+            <t t-esc="env.utils.formatCurrency(props.order.amount_total)" />
+        </td>
+        <t t-if="props.order.priority == 0">
+            <td>Low</td>
+        </t>
+        <t t-if="props.order.priority == 1">
+            <td>Normal</td>
+        </t>
+        <t t-if="props.order.priority == 2">
+            <td>Urgent</td>
+        </t>
+        <td class="print-order" t-att-data-id='props.order.id' t-on-click.stop="() => this.clickReprint(props.order)">
+            <button class="odoo-theme-button">
+                <i class="fa fa-print"></i> Print
+            </button>
+        </td>
+    </tr>
+</t>
+
 
     <t t-name="hst_ishbik_intgration.ReceiveOrderPrint" owl="1">
         <div class="receipt-screen screen h-100 bg-100">

@@ -14,7 +14,7 @@ export class ReceiveOrderPrint extends ReceiptScreen {
     }
     back() {
 		var self = this;
-        self.env.services.pos.closeTempScreen();
+        self.env.services.pos.showScreen("ReceiveScreenWidget");
 	}
     
 }

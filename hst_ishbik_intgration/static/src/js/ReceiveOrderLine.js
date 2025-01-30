@@ -42,7 +42,7 @@ export class ReceiveOrderLine extends Component {
         ).then(function(output){
             let data = output;
             data['order'] = order;
-            self.env.services.pos.showTempScreen("ReceiveOrderPrint",data)
+            self.env.services.pos.showScreen("ReceiveOrderPrint",data)
         });
 
     }
