@@ -20,7 +20,6 @@
     'assets': {
         'web.assets_backend': [
             'product_multiple_images_upload/static/src/*.js',
-            'product_multiple_images_upload/static/src/*.scss',
             'product_multiple_images_upload/static/src/*.xml',
         ],
     },
