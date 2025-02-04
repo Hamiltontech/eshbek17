@@ -1,7 +1,7 @@
 {
     'name': 'Product Multiple Images Upload',
     'author': 'Opsway',
-    'version': '16.0.1.0',
+    'version': '17.0',
     'website': 'https://www.opsway.com',
     'category': 'Sales',
     'description': 'Module to upload multiple images for a product',
