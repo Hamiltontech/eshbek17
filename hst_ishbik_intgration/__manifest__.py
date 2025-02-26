@@ -3,7 +3,7 @@
     'version': '17.0',
     'category': 'api',
     'description': """
-    - Ishbik Integration With Odoo Hamilton 
+    - Ishbik Integration With Odoo Hamilton api
     """,
     'summary': 'Ishbik Integration With Odoo Hamilton ',
     'author': 'Ibraheem Areeda - HamiltonTech',
