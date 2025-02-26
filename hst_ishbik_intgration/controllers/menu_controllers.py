@@ -4,8 +4,6 @@ from odoo.http import request
 import logging
 import json
 import werkzeug.wrappers
-import functools
-from odoo.exceptions import AccessDenied, AccessError
 
 _logger = logging.getLogger(__name__)
 
@@ -95,26 +93,4 @@ class Menu(http.Controller):
             response=json.dumps(products, default=str)
         )
 
-    @http.route("/api/v1/attendance", methods=["GET"], type="http", auth="none")
-    def get_attendance(self,*args, **kwargs):
-
-        company_id = http.request.params.get('company_id')
-
-        if not company_id:
-            return werkzeug.wrappers.Response(
-            status=400,
-            content_type="application/json; charset=utf-8",
-            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache"),("Access-Control-Allow-Origin","*"),("Access-Control-Allow-Headers","*")],
-            response=json.dumps("erorr : enter company_id in query params", default=str)
-        )
-
-        att = request.env["hr.attendance"].sudo().search_read([],['id','employee_id','check_in','check_out'])
-
-        return werkzeug.wrappers.Response(
-            status=200,
-            content_type="application/json; charset=utf-8",
-            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache"),("Access-Control-Allow-Origin","*"),("Access-Control-Allow-Headers","*")],
-            response=json.dumps(att, default=str)
-        )
-   
 

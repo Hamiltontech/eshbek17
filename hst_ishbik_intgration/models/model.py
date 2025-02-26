@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.osv.expression import OR
 
 class ResCompany(models.Model):
     _inherit = "res.company"
@@ -49,6 +50,11 @@ class PosConfig(models.Model):
             }
             all_branches_list.append(branch)
         return all_branches_list
+
+    def _get_special_products(self):
+        original_special_products = super()._get_special_products()
+        hide_in_pos_products = self.env['product.product'].search([('product_tmpl_id.hide_in_pos', '=', True)])
+        return original_special_products | hide_in_pos_products
     
 class IshbicMenuCatigories(models.Model):
     _name = "ishbic.menu.category"
@@ -93,14 +99,17 @@ class ProductTemplate(models.Model):
     callcenter = fields.Float(string="Call Center Price")
     mobile = fields.Float(string="Mobile Price")
     ishbic_menu_category_id = fields.Many2one('ishbic.menu.category')
+    hide_in_pos = fields.Boolean(string='Hide in POS', help='Check if you want to hide this product in the Point of Sale.', default=False)
+    available_in_ishbic = fields.Boolean(string='Available in Ishbic', help='Check if you want this product to appear in the Ishbic.', default=False)
+    
 
     def get_products(self,company_id):
 
         multi_company = self.env['res.company'].sudo().search([])
         if len(multi_company) > 1:
-            products = self.sudo().search([('available_in_pos','=',True),('company_id','=',company_id),])
+            products = self.sudo().search([('available_in_pos','=',True),('company_id','=',company_id),('available_in_ishbic','=',True)])
         else:
-            products = self.sudo().search([('available_in_pos','=',True)])
+            products = self.sudo().search([('available_in_pos','=',True),('available_in_ishbic','=',True)])
 
         products_data = []
         for record in products:

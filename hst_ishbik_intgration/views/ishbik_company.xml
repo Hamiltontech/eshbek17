@@ -65,8 +65,12 @@
                         <field name="cost" />
                         <field name="ishbic_tax" widget="percentage"/>
                     </group >
-                    <group string="Ishbic Product Category" colspan="2">
+                    <group string="Ishbic Product Category" colspan="1">
                         <field name="ishbic_menu_category_id" required="1"/>
+                    </group>
+                        <group string="availability" colspan="1">
+                        <field name="hide_in_pos"/>
+                        <field name="available_in_ishbic"/>
                     </group>
                 </group>
             </page>

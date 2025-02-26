@@ -649,12 +649,18 @@ _display_popup_error_paymentlines_rounding() {
       }
   }
 }
-async apply_discount(pc) {
+async apply_discount(pc,discount_type) {
   const order = this.pos.get_order();
   const lines = order.get_orderlines();
-  const product = this.pos.db.get_product_by_id(this.pos.config.discount_product_id[0]);
-  console.log("apply_discount_product",product);
+  let product_ids_to_not_display_detials = this.pos.db.product_ids_to_not_display.map((id)=>this.pos.db.get_product_by_id(id));
+  console.log(discount_type);
+  console.log("apply_discount_product",product_ids_to_not_display_detials);
+
+  product_ids_to_not_display_detials.forEach((product)=>{
+
+  })
   
+  const product = this.pos.db.get_product_by_id(12);
   if (product === undefined) {
       await this.popup.add(ErrorPopup, {
           title: _t("No discount product found"),
@@ -895,8 +901,7 @@ async apply_discount(pc) {
           // this.apply_discount(val)
         // }
         const val = Math.max(0, Math.min(100, 10));
-        this.apply_discount(val)
-
+        this.apply_discount(val,"careem") // to  do is to map a discount in the discount function figer it out from the ishbic order objedt please 
         await this.validateOrder(false);
     } else {
       alert(_t("Please remove all products from cart and try again."));
