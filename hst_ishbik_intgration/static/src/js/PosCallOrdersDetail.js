@@ -655,12 +655,14 @@ async apply_discount(pc,discount_type) {
   let product_ids_to_not_display_detials = this.pos.db.product_ids_to_not_display.map((id)=>this.pos.db.get_product_by_id(id));
   console.log(discount_type);
   console.log("apply_discount_product",product_ids_to_not_display_detials);
-
+  let desc_product_id;
   product_ids_to_not_display_detials.forEach((product)=>{
+    if (product.default_code == discount_type){
+      desc_product_id = product.id;}})
 
-  })
+  console.log("desc_product_id#########",desc_product_id);
   
-  const product = this.pos.db.get_product_by_id(12);
+  const product = this.pos.db.get_product_by_id(desc_product_id);
   if (product === undefined) {
       await this.popup.add(ErrorPopup, {
           title: _t("No discount product found"),
@@ -766,6 +768,7 @@ async apply_discount(pc,discount_type) {
     var order_id = event;
     var order = self.env.services.pos.get_order();
     var orderlines = order.get_orderlines();
+    var discounts
     if (orderlines.length == 0) {
       await self.env.services.orm
         .call("pos.call.order", "order_deliver", [order_id])
@@ -797,7 +800,7 @@ async apply_discount(pc,discount_type) {
                 "from js after calling get_pos_order in py model",
                 result
               );
-              var globalDiscount = result["global_discount"];
+              discounts = result["discounts"];
                 // order.payment_method = 
                 order.partner = undefined;
                 // order.add_paymentline(result['payment_method']);
@@ -900,8 +903,13 @@ async apply_discount(pc,discount_type) {
           // const val = Math.max(0, Math.min(100, globalDiscount));
           // this.apply_discount(val)
         // }
-        const val = Math.max(0, Math.min(100, 10));
-        this.apply_discount(val,"careem") // to  do is to map a discount in the discount function figer it out from the ishbic order objedt please 
+        // const val = Math.max(0, Math.min(100, 10));
+      
+        for (let i = 0; i < discounts.length; i++) {
+          console.log(discounts[i].type, discounts[i].amount);
+
+          this.apply_discount(discounts[i].amount,discounts[i].type) // to  do is to map a discount in the discount function figer it out from the ishbic order objedt please 
+        }
         await this.validateOrder(false);
     } else {
       alert(_t("Please remove all products from cart and try again."));

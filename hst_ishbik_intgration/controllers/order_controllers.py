@@ -18,13 +18,16 @@ class OrderIntegration(http.Controller):
     @http.route('/api/v1/orders', methods=["POST"], type="http", auth="none", csrf=False)
     def grubtech_order_create(self, **kwargs):
         ###hamiltontech-eshbek17-main-18651259#### db
-        request.session.authenticate("hamiltontech-eshbek17-main-18651259", "api", "api")
+        # request.session.authenticate("hamiltontech-eshbek17-main-18651259", "api", "api")
+        request.session.authenticate("hamiltontech-eshbek17-main-17595363", "api", "api")
         # request.session.authenticate("test_order", "admin", "admin")
         order:dict = json.loads(request.httprequest.data)
         pos_config = request.env['pos.config'].search_read([("id", "=", order['storeId'])], ['id','current_session_id','name','sequence_id','default_fiscal_position_id','pricelist_id'], limit=1)
         store_id = order['storeId']
 
         if not pos_config:
+            self.logger.info(json.dumps({"status": "failed",
+                                "message": f"store not found there is no store in with id = {store_id} in the system"}, default=str))
             return werkzeug.wrappers.Response(
             status=400,
             content_type="application/json; charset=utf-8",
@@ -35,6 +38,8 @@ class OrderIntegration(http.Controller):
 
         pricelist_id = pos_config[0]['pricelist_id']
         if not pricelist_id:
+            self.logger.info(json.dumps({"status": "failed",
+                                "message": f"store must be have defult price list, there is no defult price list with pos of branch id = {store_id}"}, default=str))
             return werkzeug.wrappers.Response(
             status=400,
             content_type="application/json; charset=utf-8",
@@ -85,6 +90,9 @@ class OrderIntegration(http.Controller):
 
         session_id = pos_config[0].get(['current_session_id'][0],False)
         if not session_id:
+            self.logger.info(json.dumps({
+                                "status": "failed",
+                                "message": f"this branch is currently closed there is no active session for branch with id = {store_id} and name = {branch_name}"}, default=str))
             branch_name = pos_config[0]['name']
             return werkzeug.wrappers.Response(
             status=400,
@@ -92,8 +100,16 @@ class OrderIntegration(http.Controller):
             headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache"),("Access-Control-Allow-Origin","*"),("Access-Control-Allow-Headers","*")],
             response=json.dumps({
                                 "status": "failed",
-                                "message": f"this branch is currently closed there is no active session for branch with id = {store_id}"}, default=str))
+                                "message": f"this branch is currently closed there is no active session for branch with id = {store_id} and name = {branch_name}"}, default=str))
         order.update({
+            # to do add the order id as a ref and make it uniqe
+            # to do add the descounts as discount type and amount
+            # to do add instructions
+            # to do add the invoiceNo
+            # to do add the type one of ('DELIVERY_BY_FOOD_AGGREGATOR','DINE_IN','PICK_UP','DELIVERY_BY_RESTAURANT',)
+            # ask for "delivery": [], what is it for+
+            # todo add "source": {"name": "talabat","uniqueOrderId": "1555347774","channel": "talabat","placedAt": "2024-04-30 7:50:23.436454","shortCode": "4529"},
+            # todo add "scheduledOrder": null,
             'branch_id':pos_config[0]['id'],
             'session_id': session_id[0],
             'lines':lines,
@@ -108,10 +124,12 @@ class OrderIntegration(http.Controller):
             'note':'from api',
             'priority':2,
             'grubtech_order_id':order['id']
-            
                               })
         payment_method_id = request.env['pos.payment.method'].search([('name','=',order.get('payment',{}).get('method','').capitalize())])
         if not payment_method_id:
+            json.dumps({
+                        "status": "failed",
+                        "message": f"Payment method = \'{order.get('payment',{}).get('method','None').capitalize()}\' not found in the system [Not Case sensitive]"}, default=str)
             return werkzeug.wrappers.Response(
             status=400,
             content_type="application/json; charset=utf-8",

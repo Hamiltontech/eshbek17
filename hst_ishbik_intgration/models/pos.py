@@ -154,11 +154,12 @@ class POSCallOrders(models.Model):
 	def get_pos_order(self, order_id):
 		call_order_obj = self.browse(int(order_id))
 		if call_order_obj:
-			print(f"??????????????? {call_order_obj.payment_method_id.name}")
+			print(f"??????????????? {call_order_obj.read([])}")
 			return {
 				'partner_id':call_order_obj.partner_id.id,
 				'name':call_order_obj.name,
 				'payment_method':call_order_obj.payment_method_id.name,
+				# 'discounts':
 				'orderline':call_order_obj.lines.read(['product_id','price_unit','qty','discount','tax_ids','combo_prod_ids','line_flag','price_subtotal_incl','price_subtotal','attribute_value_ids','price_extra','customer_note']), #here
 			}
 		return False
