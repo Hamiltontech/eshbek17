@@ -89,11 +89,11 @@ class OrderIntegration(http.Controller):
         self.logger.info(f"response.content*************{order}")
 
         session_id = pos_config[0].get(['current_session_id'][0],False)
+        branch_name = pos_config[0]['name']
         if not session_id:
             self.logger.info(json.dumps({
                                 "status": "failed",
                                 "message": f"this branch is currently closed there is no active session for branch with id = {store_id} and name = {branch_name}"}, default=str))
-            branch_name = pos_config[0]['name']
             return werkzeug.wrappers.Response(
             status=400,
             content_type="application/json; charset=utf-8",
