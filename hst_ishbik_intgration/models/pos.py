@@ -100,13 +100,12 @@ class POSCallOrders(models.Model):
 	pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', required=True, default=_default_pricelist)
 	note = fields.Text(string='Internal Notes')
 	branch_id = fields.Many2one('pos.config',string="Branch")
-	priority = fields.Integer()
 	fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', default=lambda self: self._default_session().config_id.default_fiscal_position_id)
-	cancel_reason = fields.Text()
 	company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True)
-	pos_cancel_reason = fields.Text(string="Cancel Reason")
-	pos_cancel_by = fields.Many2one('res.users', string='Cancelled By')
 	payment_method_id = fields.Many2one('pos.payment.method', string='Payment Method', required=True)
+	discounts = fields.One2many('pos.call.order.discount', 'order_id', string='Discounts')
+	delivery_fee = fields.Float(string='Delivery Fee', default=0.0)
+	order_type = fields.Selection([('DELIVERY_BY_FOOD_AGGREGATOR','Delevary By Food Aggregator'),('DINE_IN','Dine In'),('PICK_UP','Pick Up'),('DELIVERY_BY_RESTAURANT','Delivery By Restaurant')],string='Order Type')
 	
 
 	def cancel_order(self, order, reason_text):
@@ -140,8 +139,11 @@ class POSCallOrders(models.Model):
 			'branch_id': ui_order['branch_id'],
 			'state':'confirm',
 			'amount_tax':ui_order['amount_tax'],
-			'priority':ui_order['priority'],
-			'pricelist_id':ui_order['priority']
+			# 'priority':ui_order['priority'],
+			# 'pricelist_id':ui_order['priority'],
+			'discounts': ui_order['discounts'],
+			'delivery_fee': ui_order['delivery_fee'],
+			'order_type': ui_order['order_type'],
 		}
 
 	@api.model
@@ -159,7 +161,9 @@ class POSCallOrders(models.Model):
 				'partner_id':call_order_obj.partner_id.id,
 				'name':call_order_obj.name,
 				'payment_method':call_order_obj.payment_method_id.name,
-				# 'discounts':
+				'discounts':call_order_obj.discounts.read(['discount_type','amount','source']),
+				'amount_total':call_order_obj.amount_total,
+				'delivery_fee':call_order_obj.delivery_fee,
 				'orderline':call_order_obj.lines.read(['product_id','price_unit','qty','discount','tax_ids','combo_prod_ids','line_flag','price_subtotal_incl','price_subtotal','attribute_value_ids','price_extra','customer_note']), #here
 			}
 		return False
@@ -178,7 +182,7 @@ class POSCallOrders(models.Model):
 		return {'data':'sent'}
 
 	@api.model
-	def get_call_orders(self,config_id):
+	def get_call_orders(self,config_id): #TODO HERE
 		print("function in python ------------------>>","get_call_orders")
 		orders_data = []
 		call_ids = []
@@ -217,7 +221,6 @@ class POSCallOrders(models.Model):
 				'id':order.id,
 				'name':order.name,
 				'is_hidden':True,
-				'priority': order.priority,
 				'delivery_date':datetime.strftime(pytz.utc.localize(datetime.strptime(str(order.delivery_date),DEFAULT_SERVER_DATETIME_FORMAT)).astimezone(pytz.timezone(user_tz)),"%Y-%m-%dT%H:%M:%S") if self.env.user.tz else order.delivery_date,
 				'partner_id':order.partner_id.id,
 				'partner_name':order.partner_id.name,
@@ -227,7 +230,7 @@ class POSCallOrders(models.Model):
 		return {'data':orders_data,'call_ids':call_ids}
 
 
-	def print_pos_receipt(self):
+	def print_pos_receipt(self): #TODO HERE
 		orderlines = []
 		discount = 0
 
@@ -346,3 +349,12 @@ class POSAllOrdersLine(models.Model):
 	def _get_tax_ids_after_fiscal_position(self):
 		for line in self:
 			line.tax_ids_after_fiscal_position = line.call_order_id.fiscal_position_id.map_tax(line.tax_ids)
+
+class PosCallOrderDiscount(models.Model):
+	_name = 'pos.call.order.discount'
+	_description = 'POS Call Order Discount'
+
+	order_id = fields.Many2one('pos.call.order', string='Order', ondelete='cascade')
+	discount_type = fields.Char(string='Discount Type', required=True)
+	amount = fields.Float(string='Amount', required=True)
+	source = fields.Char(string='Source', required=True)

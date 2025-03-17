@@ -123,7 +123,10 @@ class OrderIntegration(http.Controller):
             'company_id':'1',
             'note':'from api',
             'priority':2,
-            'grubtech_order_id':order['id']
+            'grubtech_order_id':order['id'],
+            'discounts':self.add_discounts(order['payment']['charges']['discounts'],order['source']['name']),
+            'delivery_fee':order['payment']['charges']['deliveryFee']['amount'],
+            'order_type':order['type'],
                               })
         payment_method_id = request.env['pos.payment.method'].search([('name','=',order.get('payment',{}).get('method','').capitalize())])
         if not payment_method_id:
@@ -206,3 +209,16 @@ class OrderIntegration(http.Controller):
             partner_id = request.env['res.partner'].sudo().create({"name":name,"mobile":phone_number})
             print(3333333333333333333333333,partner_id)
             return partner_id.id 
+
+    def add_discounts(self,discounts,source):
+        discount_list = []
+        for discount in discounts:
+            if discount['type'] == 'FOOD_AGGRIGATTOR_DISCOUNT':
+                discount['type'] = source
+            record = request.env['pos.call.order.discount'].create({
+                'discount_type': discount['type'],
+                'amount': discount['amount'],
+                'source': source
+            })
+            discount_list.append(record.id)
+        return discount_list

@@ -655,6 +655,8 @@ async apply_discount(pc,discount_type) {
   let product_ids_to_not_display_detials = this.pos.db.product_ids_to_not_display.map((id)=>this.pos.db.get_product_by_id(id));
   console.log(discount_type);
   console.log("apply_discount_product",product_ids_to_not_display_detials);
+  console.log("^^^^^^^^^^^^^^",order,"~~~~~~~~~~~~~~",lines);
+  
   let desc_product_id;
   product_ids_to_not_display_detials.forEach((product)=>{
     if (product.default_code == discount_type){
@@ -688,14 +690,11 @@ async apply_discount(pc,discount_type) {
           .filter((id) => id !== "")
           .map((id) => Number(id));
 
-      const baseToDiscount = order.calculate_base_amount(
-          tax_ids_array,
-          lines.filter((ll) => ll.isGlobalDiscountApplicable())
-      );
+      // const baseToDiscount = order.get_total_with_tax();
 
       // We add the price as manually set to avoid recomputation when changing customer.
-      const discount = (-pc / 100.0) * baseToDiscount;
-      if (discount < 0) {
+      const discount = (-pc);
+      if (discount ) {
           order.add_product(product, {
               price: discount,
               lst_price: discount,
@@ -718,7 +717,6 @@ async apply_discount(pc,discount_type) {
       }
   }
 }
-  
   GetFormattedDate(date) {
     var month = ("0" + (date.getMonth() + 1)).slice(-2);
     var day = ("0" + date.getDate()).slice(-2);
@@ -769,6 +767,7 @@ async apply_discount(pc,discount_type) {
     var order = self.env.services.pos.get_order();
     var orderlines = order.get_orderlines();
     var discounts
+    var amount_total
     if (orderlines.length == 0) {
       await self.env.services.orm
         .call("pos.call.order", "order_deliver", [order_id])
@@ -801,6 +800,7 @@ async apply_discount(pc,discount_type) {
                 result
               );
               discounts = result["discounts"];
+              amount_total = result["amount_total"];
                 // order.payment_method = 
                 order.partner = undefined;
                 // order.add_paymentline(result['payment_method']);
@@ -887,8 +887,6 @@ async apply_discount(pc,discount_type) {
                   let pos_order_loaded = self.env.services.pos.get_order();
                   let payment_method = self.env.services.pos.payment_methods.filter((method) =>method.name == result["payment_method"]);
                   pos_order_loaded.add_paymentline(... payment_method);
-                  console.log("$$$$$$$$$$$$inpos ", pos_order_loaded);
-                  console.log("@@@@@@@@@@@@@@@payment_methods",... payment_method);            
                   
                   
                   self.cancel();
@@ -896,19 +894,18 @@ async apply_discount(pc,discount_type) {
                   self.env.services.pos.showScreen("ReceiveScreenWidget");
                 }
               });
-          }
-        });
+            }
+          });
         
         // if (globalDiscount > 0) {
           // const val = Math.max(0, Math.min(100, globalDiscount));
           // this.apply_discount(val)
         // }
         // const val = Math.max(0, Math.min(100, 10));
-      
+        // discounts.push({ amount: -2, discount_type: "Delivery_Fee" });
         for (let i = 0; i < discounts.length; i++) {
-          console.log(discounts[i].type, discounts[i].amount);
-
-          this.apply_discount(discounts[i].amount,discounts[i].type) // to  do is to map a discount in the discount function figer it out from the ishbic order objedt please 
+          console.log("////////////////////////////////",discounts[i].discount_type, discounts[i].amount,order,"************",amount_total);
+          this.apply_discount(discounts[i].amount,discounts[i].discount_type) // to  do is to map a discount in the discount function figer it out from the ishbic order objedt please 
         }
         await this.validateOrder(false);
     } else {
