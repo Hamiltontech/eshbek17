@@ -82,6 +82,44 @@ class OrderIntegration(http.Controller):
                             'line_flag': False, 
                             }]
             lines.append(line)
+            
+        if int(order['payment']['charges']['deliveryFee']['amount']) > 0:
+            delivery_fee = order['payment']['charges']['deliveryFee']['amount']
+            delivery_line = [0, 0, { 'skip_change': False,
+                            'qty': 1, 
+                            'price_unit': delivery_fee, 
+                            'price_subtotal': delivery_fee, 
+                            'price_subtotal_incl': delivery_fee, 
+                            'discount': 0, 
+                            'product_id': self.get_product_id_by_internal_ref('Delivery_Fee'), 
+                            'attribute_value_ids': [], 
+                            'full_product_name': "Delivery Fee",
+                            'price_extra': delivery_fee,
+                            'customer_note': '', 
+                            'line_note': '', 
+                            'line_flag': False, 
+                            }]
+            lines.append(delivery_line)
+        
+        if order['payment']['charges']['discounts']:
+            for discount in order['payment']['charges']['discounts']:
+                pass #TODO ADD DISCOUNTS SAME IDEA AS DELERY FEE
+            delivery_fee = order['payment']['charges']['deliveryFee']['amount']
+            delivery_line = [0, 0, { 'skip_change': False,
+                            'qty': 1, 
+                            'price_unit': delivery_fee, 
+                            'price_subtotal': delivery_fee, 
+                            'price_subtotal_incl': delivery_fee, 
+                            'discount': 0, 
+                            'product_id': self.get_product_id_by_internal_ref('Delivery_Fee'), 
+                            'attribute_value_ids': [], 
+                            'full_product_name': "Delivery Fee",
+                            'price_extra': delivery_fee,
+                            'customer_note': '', 
+                            'line_note': '', 
+                            'line_flag': False, 
+                            }]
+            lines.append(delivery_line)
 
 
         print("/-/-/-/-/-/",lines)
@@ -222,3 +260,10 @@ class OrderIntegration(http.Controller):
             })
             discount_list.append(record.id)
         return discount_list
+    
+    def get_product_id_by_internal_ref(self,internal_ref):
+        product_id = request.env['product.template'].sudo().search([('default_code','=',internal_ref)])
+        if product_id:
+            return product_id.id
+        else:
+            return False

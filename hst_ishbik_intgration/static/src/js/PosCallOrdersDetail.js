@@ -676,9 +676,8 @@ async apply_discount(pc,discount_type) {
   }
 
   // Remove existing discounts
-  lines
-      .filter((line) => line.get_product() === product)
-      .forEach((line) => order._unlinkOrderline(line));
+  lines.filter((line) => {line.get_product() === product}).forEach((line) => order._unlinkOrderline(line));
+  console.log("afffffffffffffffffffter",lines,"************",lines.forEach((line) => {console.log(line.get_product());}),"------------------",product);
 
   // Add one discount line per tax group
   const linesByTax = order.get_orderlines_grouped_by_tax_ids();
@@ -883,12 +882,9 @@ async apply_discount(pc,discount_type) {
                 self.env.services.pos.closeTempScreen();
                 self.env.services.pos.showScreen("IshbikPaymentScreen");
                 } else {
-                  console.log("orrrrrrrrrrrrrder",result);
                   let pos_order_loaded = self.env.services.pos.get_order();
                   let payment_method = self.env.services.pos.payment_methods.filter((method) =>method.name == result["payment_method"]);
                   pos_order_loaded.add_paymentline(... payment_method);
-                  
-                  
                   self.cancel();
                   self.env.services.pos.closeTempScreen();
                   self.env.services.pos.showScreen("ReceiveScreenWidget");
@@ -902,7 +898,7 @@ async apply_discount(pc,discount_type) {
           // this.apply_discount(val)
         // }
         // const val = Math.max(0, Math.min(100, 10));
-        // discounts.push({ amount: -2, discount_type: "Delivery_Fee" });
+        // discounts.push({ amount: 2, discount_type: "Delivery_Fee" });
         for (let i = 0; i < discounts.length; i++) {
           console.log("////////////////////////////////",discounts[i].discount_type, discounts[i].amount,order,"************",amount_total);
           this.apply_discount(discounts[i].amount,discounts[i].discount_type) // to  do is to map a discount in the discount function figer it out from the ishbic order objedt please 
