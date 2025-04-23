@@ -18,7 +18,7 @@ class OrderIntegration(http.Controller):
     @http.route('/api/v1/orders', methods=["POST"], type="http", auth="none", csrf=False)
     def grubtech_order_create(self, **kwargs):
         ###hamiltontech-eshbek17-main-18651259#### db
-        request.session.authenticate("hamiltontech-eshbek17-main-18651259", "api", "api")
+        request.session.authenticate(request.db, "api", "api")
         # request.session.authenticate("hamiltontech-eshbek17-main-17595363", "api", "api")
         # request.session.authenticate("test_order", "admin", "admin")
         order:dict = json.loads(request.httprequest.data)
