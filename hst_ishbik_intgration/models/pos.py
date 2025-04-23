@@ -144,6 +144,7 @@ class POSCallOrders(models.Model):
 			'discounts': ui_order['discounts'],
 			'delivery_fee': ui_order['delivery_fee'],
 			'order_type': ui_order['order_type'],
+			'payment_method_id': ui_order['payment_method_id'],
 		}
 
 	@api.model

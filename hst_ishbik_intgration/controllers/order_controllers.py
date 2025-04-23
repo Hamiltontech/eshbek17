@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-# Part of BrowseInfo. See LICENSE file for full copyright and licensing details.
-
 from datetime import datetime
 import json
 import logging
 import copy
 import re
-
 import werkzeug
 from odoo import http
 from odoo.http import request
@@ -16,40 +13,29 @@ class OrderIntegration(http.Controller):
     logger = logging.getLogger(__name__)
 
     @http.route('/api/v1/orders', methods=["POST"], type="http", auth="none", csrf=False)
-    def grubtech_order_create(self, **kwargs):
-        ###hamiltontech-eshbek17-main-18651259#### db
+    def ishbic_order_create(self, **kwargs):
         request.session.authenticate(request.db, "api", "api")
-        # request.session.authenticate("hamiltontech-eshbek17-main-17595363", "api", "api")
-        # request.session.authenticate("test_order", "admin", "admin")
         order:dict = json.loads(request.httprequest.data)
-        pos_config = request.env['pos.config'].search_read([("id", "=", order['storeId'])], ['id','current_session_id','name','sequence_id','default_fiscal_position_id','pricelist_id'], limit=1)
-        store_id = order['storeId']
-
-        if not pos_config:
-            self.logger.info(json.dumps({"status": "failed",
-                                "message": f"store not found there is no store in with id = {store_id} in the system"}, default=str))
+        
+        #validate the data
+        validated_data = self._order_data_validation(order)
+        if validated_data['status'] == 'failed':
             return werkzeug.wrappers.Response(
-            status=400,
-            content_type="application/json; charset=utf-8",
-            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache"),("Access-Control-Allow-Origin","*"),("Access-Control-Allow-Headers","*")],
-            response=json.dumps({"status": "failed",
-                                "message": f"store not found there is no store in with id = {store_id} in the system"}, default=str)
-        )
-
-        pricelist_id = pos_config[0]['pricelist_id']
-        if not pricelist_id:
-            self.logger.info(json.dumps({"status": "failed",
-                                "message": f"store must be have defult price list, there is no defult price list with pos of branch id = {store_id}"}, default=str))
-            return werkzeug.wrappers.Response(
-            status=400,
-            content_type="application/json; charset=utf-8",
-            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache"),("Access-Control-Allow-Origin","*"),("Access-Control-Allow-Headers","*")],
-            response=json.dumps({"status": "failed",
-                                "message": f"store must be have defult price list, there is no defult price list with pos of branch id = {store_id}"}, default=str)
-        )
+                    status=400,
+                    content_type="application/json; charset=utf-8",
+                    headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache"),("Access-Control-Allow-Headers","*")],
+                    response=json.dumps( validated_data, default=str)
+                )
+        if validated_data['status'] == 'success':
+            session_id = validated_data['session_id']
+            branch_name = validated_data['branch_name']
+            branch_id = validated_data['branch_id']
+            fiscal_position_id = validated_data['fiscal_position_id']
+            pricelist_id = validated_data['pricelist_id']
+            payment_method_id = validated_data['payment_method_id']
+            
         lines = []
         for item in order['items']:
-
             price_extra = []
             attribute_value_ids = []
             for mod in item['modifiers']:
@@ -58,8 +44,6 @@ class OrderIntegration(http.Controller):
                 price_extra.append(mod['price']['totalPrice']['amount'])
                 if mod_id:
                     attribute_value_ids.append(mod_id)
-                    print("@@@@@@@@@@@@@@@@@@22",mod_id)
-            print("###################",attribute_value_ids)
             price_unit = item['price']['totalPrice']['amount']
             price_subtotal_incl = item['price']['totalPrice']['amount']
             discount = item['price']['discountamount']['amount']
@@ -103,42 +87,24 @@ class OrderIntegration(http.Controller):
         
         if order['payment']['charges']['discounts']:
             for discount in order['payment']['charges']['discounts']:
-                pass #TODO ADD DISCOUNTS SAME IDEA AS DELERY FEE
-            delivery_fee = order['payment']['charges']['deliveryFee']['amount']
-            delivery_line = [0, 0, { 'skip_change': False,
-                            'qty': 1, 
-                            'price_unit': delivery_fee, 
-                            'price_subtotal': delivery_fee, 
-                            'price_subtotal_incl': delivery_fee, 
-                            'discount': 0, 
-                            'product_id': self.get_product_id_by_internal_ref('Delivery_Fee'), 
-                            'attribute_value_ids': [], 
-                            'full_product_name': "Delivery Fee",
-                            'price_extra': delivery_fee,
-                            'customer_note': '', 
-                            'line_note': '', 
-                            'line_flag': False, 
-                            }]
-            lines.append(delivery_line)
+                #TODO ADD DISCOUNTS SAME IDEA AS DELERY FEE
+                delivery_fee = order['payment']['charges']['deliveryFee']['amount']
+                delivery_line = [0, 0, { 'skip_change': False,
+                                'qty': 1, 
+                                'price_unit': delivery_fee, 
+                                'price_subtotal': delivery_fee, 
+                                'price_subtotal_incl': delivery_fee, 
+                                'discount': 0, 
+                                'product_id': self.get_product_id_by_internal_ref('Delivery_Fee'), 
+                                'attribute_value_ids': [], 
+                                'full_product_name': "Delivery Fee",
+                                'price_extra': delivery_fee,
+                                'customer_note': '', 
+                                'line_note': '', 
+                                'line_flag': False, 
+                                }]
+                lines.append(delivery_line)
 
-
-        print("/-/-/-/-/-/",lines)
-        print("++++++++++++++++",pos_config[0]['pricelist_id'][0])
-        self.logger.info(f"response.content*************{order}")
-
-        session_id = pos_config[0].get(['current_session_id'][0],False)
-        branch_name = pos_config[0]['name']
-        if not session_id:
-            self.logger.info(json.dumps({
-                                "status": "failed",
-                                "message": f"this branch is currently closed there is no active session for branch with id = {store_id} and name = {branch_name}"}, default=str))
-            return werkzeug.wrappers.Response(
-            status=400,
-            content_type="application/json; charset=utf-8",
-            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache"),("Access-Control-Allow-Origin","*"),("Access-Control-Allow-Headers","*")],
-            response=json.dumps({
-                                "status": "failed",
-                                "message": f"this branch is currently closed there is no active session for branch with id = {store_id} and name = {branch_name}"}, default=str))
         order.update({
             # to do add the order id as a ref and make it uniqe
             # to do add the descounts as discount type and amount
@@ -148,13 +114,13 @@ class OrderIntegration(http.Controller):
             # ask for "delivery": [], what is it for+
             # todo add "source": {"name": "talabat","uniqueOrderId": "1555347774","channel": "talabat","placedAt": "2024-04-30 7:50:23.436454","shortCode": "4529"},
             # todo add "scheduledOrder": null,
-            'branch_id':pos_config[0]['id'],
+            'branch_id':branch_id,
             'session_id': session_id[0],
             'lines':lines,
             # 'delivery_date':'2024-08-31 12:11:08',
             'delivery_date':re.sub(r'\.\d+', '', order['placedAt']),
-            'fiscal_position_id':pos_config[0]['default_fiscal_position_id'],
-            'pricelist_id':pos_config[0]['pricelist_id'][0],
+            'fiscal_position_id':fiscal_position_id,
+            'pricelist_id':pricelist_id,
             'amount_total':100,
             'amount_tax':1,
             'partner_id':self.get_or_create_partner(order['customer']['name'],order['customer']['contactNumber']),
@@ -164,58 +130,26 @@ class OrderIntegration(http.Controller):
             'grubtech_order_id':order['id'],
             'discounts':self.add_discounts(order['payment']['charges']['discounts'],order['source']['name']),
             'delivery_fee':order['payment']['charges']['deliveryFee']['amount'],
-            'order_type':order['type'],
-                              })
-        payment_method_id = request.env['pos.payment.method'].search([('name','=',order.get('payment',{}).get('method','').capitalize())])
-        if not payment_method_id:
-            json.dumps({
-                        "status": "failed",
-                        "message": f"Payment method = \'{order.get('payment',{}).get('method','None').capitalize()}\' not found in the system [Not Case sensitive]"}, default=str)
-            return werkzeug.wrappers.Response(
-            status=400,
-            content_type="application/json; charset=utf-8",
-            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache"),("Access-Control-Allow-Origin","*"),("Access-Control-Allow-Headers","*")],
-            response=json.dumps({
-                                "status": "failed",
-                                "message": f"Payment method = \'{order.get('payment',{}).get('method','None').capitalize()}\' not found in the system [Not Case sensitive]"}, default=str))
-        print("$$$$$$$$$$$$$$$",order)
-        self.logger.info(f"pos_call_order_data*************{order}")
+            'order_type':order['type']})
+        
         pos_order = request.env['pos.call.order'].create_pos_call_order(request.env['pos.call.order']._order_fields(order))
-        print(F"\n ORDER ID{pos_order} \n")
         pos_order_result = pos_order['result'][0]
-        
-        # create pos payment and fill the payment method id form payment object >> method
-            
-        print(F"\n payment_method_id {payment_method_id.id} \n")
-        
-
         pos_call_order_record = request.env['pos.call.order'].browse(pos_order_result['id'])
         pos_call_order_record.write({"payment_method_id":payment_method_id.id})
-        print(F"\n ORDER ID{pos_call_order_record} \n")
         
-        res = {}
-        res['ishbic_order_id'] = order['id']
-        res['odoo_order_id'] = pos_order['result'][0]['id']
-        res['storeId'] = order['storeId']
-        res['placedAt'] = order['placedAt']
-        res['source'] = order['source']
-        res['customer'] = order['customer']
-        res['items'] = [ {"product_id" : product['id'],"product_name" : product['name'],"quantity" : product['quantity']} for product in order['items']]
-        res['charges'] = order['payment']['charges']
-        # self.logger.warning(f"// form main controller pos_order {pos_order}")
-        # if pos_order:
-        #     print(8888888888888888888888,pos_order)
-        #     with_user = request.env['ir.config_parameter'].sudo()
-        #     bi_grubtech_service_id = with_user.get_param('bi_grubtech_integration.bi_grubtech_service_id')
-        #     api_url = 'v1/commonpos/v1/' + bi_grubtech_service_id + '/orders/' + pos_order['result'][0]['grubtech_order_id'] + "/accept"
-        #     self.logger.info(f"-----------{pos_order['result'][0]['grubtech_order_id']}")
-        #     try:
-        #         response = request.env['grubtech.api.request'].request_grubtech_api(api_url, data=[], method="post")
-        #     except Exception as e:
-        #         print(e)
-            # if response.get('status') == 204:
-            #     pos_order.write({'grubtech_order_id': response.get('externalReferenceId')})
-
+        res = {
+        'ishbic_order_id': order['id'],
+        'odoo_order_id': pos_order['result'][0]['id'],
+        'storeId': order['storeId'],
+        'placedAt': order['placedAt'],
+        'source':order['source'],
+        'customer': order['customer'],
+        'items': [{"product_id": product['id'],
+                   "product_name": product['name'],
+                   "quantity": product['quantity']} for product in order['items']],
+        'charges': order['payment']['charges']
+        }
+        
         return werkzeug.wrappers.Response(
         status=200,
         content_type="application/json; charset=utf-8",
@@ -225,8 +159,7 @@ class OrderIntegration(http.Controller):
                                 "message": "Order successfully placed.",
                                 "data": res
                             }, default=str)
-    )
-
+                                            )
     
     def fix_datetime_format(self,date_str):
         try:
@@ -267,3 +200,46 @@ class OrderIntegration(http.Controller):
             return product_id.id
         else:
             return False
+        
+    def _order_data_validation(self, order):
+        
+        # Check if the order store ID is present
+        pos_config = request.env['pos.config'].search_read([("id", "=", order['storeId'])], ['id','current_session_id','name','sequence_id','default_fiscal_position_id','pricelist_id'], limit=1)
+        store_id = order['storeId']
+        if not pos_config:
+            self.logger.info(json.dumps({"status": "failed","message": f"store not found there is no store in with id = {store_id} in the system"}, default=str))
+            return {"status": "failed",
+                    "message": f"store not found there is no store in with id = {store_id} in the system"}
+
+        # Check if the order has a valid pricelist ID
+        pricelist_id = pos_config[0]['pricelist_id']
+        if not pricelist_id:
+            self.logger.info(json.dumps({"status": "failed","message": f"store must be have defult price list, there is no defult price list with pos of branch id = {store_id}"}, default=str))
+            return {"status": "failed",
+                    "message": f"store must be have defult price list, there is no defult price list with pos of branch id = {store_id}"}
+            
+        # Check if the branch has an active session
+        session_id = pos_config[0].get(['current_session_id'][0],False)
+        branch_name = pos_config[0]['name']
+        branch_id = pos_config[0]['id']
+        if not session_id:
+            self.logger.info(json.dumps({"status": "failed","message": f"this branch is currently closed there is no active session for branch with id = {store_id} and name = {branch_name}"}, default=str))
+            return {"status": "failed",
+                    "message": f"this branch is currently closed there is no active session for branch with id = {store_id} and name = {branch_name}"}
+            
+        # Check if the payment method is valid
+        payment_method_id = request.env['pos.payment.method'].search([('name','=',order.get('payment',{}).get('method','').capitalize())])
+        if not payment_method_id:
+            return{"status": "failed",
+                    "message": f"Payment method = \'{order.get('payment',{}).get('method','None').capitalize()}\' not found in the system [Not Case sensitive]"}
+            
+        # if the data is valid return session data
+        fiscal_position_id = pos_config[0]['default_fiscal_position_id']
+        pricelist_id = pos_config[0]['pricelist_id'][0]
+        return {"status": "success",
+                "session_id": session_id,
+                "branch_name":branch_name,
+                "branch_id":branch_id,
+                "fiscal_position_id":fiscal_position_id,
+                "pricelist_id":pricelist_id,
+                "payment_method_id":payment_method_id}
