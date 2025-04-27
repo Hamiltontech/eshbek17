@@ -141,7 +141,7 @@ class POSCallOrders(models.Model):
 			'amount_tax':ui_order['amount_tax'],
 			# 'priority':ui_order['priority'],
 			'pricelist_id':ui_order['pricelist_id'],
-			'discounts': ui_order['discounts'],
+			# 'discounts': ui_order['discounts'],
 			'delivery_fee': ui_order['delivery_fee'],
 			'order_type': ui_order['order_type'],
 			'payment_method_id': ui_order['payment_method_id'],
@@ -276,7 +276,6 @@ class POSAllOrdersLine(models.Model):
 	_description="POS Call Order Line"
 
 	def _order_line_fields(self, line):
-		print("`````````````",line)
 		line2 = [0,0,{}]
 		product = self.env['product.product'].browse(line[2]['product_id'])
 		print("//////////**********",product)

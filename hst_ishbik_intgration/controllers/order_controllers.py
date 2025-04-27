@@ -63,7 +63,7 @@ class OrderIntegration(http.Controller):
                             'price_extra': (sum(price_extra)),
                             'customer_note': '', 
                             'line_note': '', 
-                            'line_flag': False, 
+                            'line_flag': True, 
                             }]
             lines.append(line)
             
@@ -87,23 +87,24 @@ class OrderIntegration(http.Controller):
         
         if order['payment']['charges']['discounts']:
             for discount in order['payment']['charges']['discounts']:
-                #TODO ADD DISCOUNTS SAME IDEA AS DELERY FEE
-                delivery_fee = order['payment']['charges']['deliveryFee']['amount']
-                delivery_line = [0, 0, { 'skip_change': False,
+                discount_amount = discount['amount']
+                discount_type = discount['type']
+                source = order['source']['name']
+                discount_line = [0, 0, { 'skip_change': False,
                                 'qty': 1, 
-                                'price_unit': delivery_fee, 
-                                'price_subtotal': delivery_fee, 
-                                'price_subtotal_incl': delivery_fee, 
+                                'price_unit': discount_amount, 
+                                'price_subtotal': discount_amount, 
+                                'price_subtotal_incl': discount_amount, 
                                 'discount': 0, 
-                                'product_id': self.get_product_id_by_internal_ref('Delivery_Fee'), 
+                                'product_id': self.get_product_id_by_internal_ref(discount_type,source), 
                                 'attribute_value_ids': [], 
-                                'full_product_name': "Delivery Fee",
-                                'price_extra': delivery_fee,
+                                'full_product_name': "discount",
+                                'price_extra': 0,
                                 'customer_note': '', 
                                 'line_note': '', 
                                 'line_flag': False, 
                                 }]
-                lines.append(delivery_line)
+                lines.append(discount_line)
 
         order.update({
             # to do add the order id as a ref and make it uniqe
@@ -117,7 +118,6 @@ class OrderIntegration(http.Controller):
             'branch_id':branch_id,
             'session_id': session_id[0],
             'lines':lines,
-            # 'delivery_date':'2024-08-31 12:11:08',
             'delivery_date':re.sub(r'\.\d+', '', order['placedAt']),
             'fiscal_position_id':fiscal_position_id,
             'pricelist_id':pricelist_id,
@@ -126,16 +126,14 @@ class OrderIntegration(http.Controller):
             'partner_id':self.get_or_create_partner(order['customer']['name'],order['customer']['contactNumber']),
             'company_id':'1',
             'note':'from api',
-            'priority':2,
             'grubtech_order_id':order['id'],
-            'discounts':self.add_discounts(order['payment']['charges']['discounts'],order['source']['name']),
+            # 'discounts':self.add_discounts(order['payment']['charges']['discounts'],order['source']['name']),
             'delivery_fee':order['payment']['charges']['deliveryFee']['amount'],
-            'order_type':order['type']})
+            'order_type':order['type'],
+            'payment_method_id':payment_method_id.id,
+            })
         
         pos_order = request.env['pos.call.order'].create_pos_call_order(request.env['pos.call.order']._order_fields(order))
-        pos_order_result = pos_order['result'][0]
-        pos_call_order_record = request.env['pos.call.order'].browse(pos_order_result['id'])
-        pos_call_order_record.write({"payment_method_id":payment_method_id.id})
         
         res = {
         'ishbic_order_id': order['id'],
@@ -155,9 +153,9 @@ class OrderIntegration(http.Controller):
         content_type="application/json; charset=utf-8",
         headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache"),("Access-Control-Allow-Origin","*"),("Access-Control-Allow-Headers","*")],
         response=json.dumps({
-                                "status": "success",
-                                "message": "Order successfully placed.",
-                                "data": res
+                            "status": "success",
+                            "message": "Order successfully placed.",
+                            "data": res
                             }, default=str)
                                             )
     
@@ -178,7 +176,6 @@ class OrderIntegration(http.Controller):
             return partner_id.id 
         else:
             partner_id = request.env['res.partner'].sudo().create({"name":name,"mobile":phone_number})
-            print(3333333333333333333333333,partner_id)
             return partner_id.id 
 
     def add_discounts(self,discounts,source):
@@ -194,7 +191,14 @@ class OrderIntegration(http.Controller):
             discount_list.append(record.id)
         return discount_list
     
-    def get_product_id_by_internal_ref(self,internal_ref):
+    def get_product_id_by_internal_ref(self,internal_ref=None, source=None):
+        if internal_ref == 'FOOD_AGGRIGATTOR_DISCOUNT':
+            product_id = request.env['product.template'].sudo().search([('default_code','=',source.upper())])
+            if product_id:
+                return product_id.id
+            else:
+                return
+
         product_id = request.env['product.template'].sudo().search([('default_code','=',internal_ref)])
         if product_id:
             return product_id.id

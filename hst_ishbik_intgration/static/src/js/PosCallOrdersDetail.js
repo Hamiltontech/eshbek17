@@ -765,7 +765,6 @@ async apply_discount(pc,discount_type) {
     var order_id = event;
     var order = self.env.services.pos.get_order();
     var orderlines = order.get_orderlines();
-    var discounts
     var amount_total
     if (orderlines.length == 0) {
       await self.env.services.orm
@@ -781,8 +780,6 @@ async apply_discount(pc,discount_type) {
           }
 
           var order = self.env.services.pos.get_order();
-          console.log(888888888888888,order);
-          
           var orderlines = order.get_orderlines();
           console.log(
             "from js after calling order.get_orderlines()",
@@ -798,11 +795,8 @@ async apply_discount(pc,discount_type) {
                 "from js after calling get_pos_order in py model",
                 result
               );
-              discounts = result["discounts"];
               amount_total = result["amount_total"];
-                // order.payment_method = 
                 order.partner = undefined;
-                // order.add_paymentline(result['payment_method']);
                 order.call_order_id = result["name"];
                 order.call_id = order_id;
                 if (result["partner_id"]) {
@@ -836,7 +830,7 @@ async apply_discount(pc,discount_type) {
                       }
                     );
                     a_orderline.set_quantity(order_data[i]["qty"], true);
-                    a_orderline.set_unit_price(0.0);
+                    a_orderline.set_unit_price(order_data[i]["price_unit"]);
                     order.add_orderline(a_orderline);
                     let a = order_data[i].combo_prod_ids;
                     for (var j = 0; j < a.length; j++) {
@@ -893,16 +887,6 @@ async apply_discount(pc,discount_type) {
             }
           });
         
-        // if (globalDiscount > 0) {
-          // const val = Math.max(0, Math.min(100, globalDiscount));
-          // this.apply_discount(val)
-        // }
-        // const val = Math.max(0, Math.min(100, 10));
-        // discounts.push({ amount: 2, discount_type: "Delivery_Fee" });
-        for (let i = 0; i < discounts.length; i++) {
-          console.log("////////////////////////////////",discounts[i].discount_type, discounts[i].amount,order,"************",amount_total);
-          this.apply_discount(discounts[i].amount,discounts[i].discount_type) // to  do is to map a discount in the discount function figer it out from the ishbic order objedt please 
-        }
         await this.validateOrder(false);
     } else {
       alert(_t("Please remove all products from cart and try again."));
