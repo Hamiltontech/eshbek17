@@ -865,6 +865,7 @@ async apply_discount(pc,discount_type) {
                           order_data[i]["attribute_value_ids"],
                         price_extra: order_data[i]["price_extra"],
                         customer_note: order_data[i]["customer_note"],
+                        price: order_data[i]["price_unit"],
                       }); //manipulate here when adding the product
                     }
                   }

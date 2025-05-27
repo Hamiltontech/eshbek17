@@ -63,7 +63,7 @@ class OrderIntegration(http.Controller):
                             'price_extra': (sum(price_extra)),
                             'customer_note': '', 
                             'line_note': '', 
-                            'line_flag': True, 
+                            'line_flag': False, 
                             }]
             lines.append(line)
             
@@ -92,9 +92,9 @@ class OrderIntegration(http.Controller):
                 source = order['source']['name']
                 discount_line = [0, 0, { 'skip_change': False,
                                 'qty': 1, 
-                                'price_unit': discount_amount, 
-                                'price_subtotal': discount_amount, 
-                                'price_subtotal_incl': discount_amount, 
+                                'price_unit': discount_amount * -1, 
+                                'price_subtotal': discount_amount  * -1, 
+                                'price_subtotal_incl': discount_amount * -1, 
                                 'discount': 0, 
                                 'product_id': self.get_product_id_by_internal_ref(discount_type,source), 
                                 'attribute_value_ids': [], 

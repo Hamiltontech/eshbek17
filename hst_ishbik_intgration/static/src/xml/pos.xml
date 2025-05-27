@@ -300,7 +300,6 @@
                                         <th t-if="!env.isMobile">Customer Name</th>
                                         <th t-if="!env.isMobile">Date</th>
                                         <th>Total amount</th>
-                                        <th>Priority</th>
                                         <th>Receipt</th>
                                     </tr>
                                 </thead>
@@ -376,7 +375,7 @@
                         <div class="actions d-flex flex-column justify-content-between flex-lg-grow-1 flex-grow-0 flex-shrink-1 flex-basis-0">
                             <div class="d-flex flex-column m-4">
                                 <div class="buttons my-3">
-                                    <button class="button print btn btn-lg btn-secondary w-100 py-3" t-on-click="printReceipt">
+                                    <button class="button print btn btn-lg btn-secondary w-100 py-3" t-on-click="test">
                                         <i class="fa fa-print ms-2" t-ref="order-print-receipt-button"></i> Print Receipt
                                     </button>
                                 </div>
