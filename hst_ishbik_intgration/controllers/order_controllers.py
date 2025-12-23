@@ -90,13 +90,37 @@ class OrderIntegration(http.Controller):
                 discount_amount = discount['amount']
                 discount_type = discount['type']
                 source = order['source']['name']
+                product_id = self.get_product_id_by_internal_ref(discount_type, source)
+                if not product_id:
+                    error_msg = (
+                        f"Product not configured for discount type '{discount_type}' and source '{source}'. "
+                        f"Please configure a product.template with default_code='{discount_type}' or, for "
+                        f"FOOD_AGGRIGATTOR_DISCOUNT, default_code='{source.upper()}'."
+                    )
+                    self.logger.info(json.dumps({"status": "failed", "message": error_msg}, default=str))
+                    return werkzeug.wrappers.Response(
+                        status=400,
+                        content_type="application/json; charset=utf-8",
+                        headers=[
+                            ("Cache-Control", "no-store"),
+                            ("Pragma", "no-cache"),
+                            ("Access-Control-Allow-Headers", "*"),
+                        ],
+                        response=json.dumps(
+                            {
+                                "status": "failed",
+                                "message": error_msg,
+                            },
+                            default=str,
+                        ),
+                    )
                 discount_line = [0, 0, { 'skip_change': False,
                                 'qty': 1, 
                                 'price_unit': discount_amount * -1, 
                                 'price_subtotal': discount_amount  * -1, 
                                 'price_subtotal_incl': discount_amount * -1, 
                                 'discount': 0, 
-                                'product_id': self.get_product_id_by_internal_ref(discount_type,source), 
+                                'product_id': product_id, 
                                 'attribute_value_ids': [], 
                                 'full_product_name': "discount",
                                 'price_extra': 0,
@@ -197,7 +221,7 @@ class OrderIntegration(http.Controller):
             if product_id:
                 return product_id.id
             else:
-                return
+                return False
 
         product_id = request.env['product.template'].sudo().search([('default_code','=',internal_ref)])
         if product_id:
