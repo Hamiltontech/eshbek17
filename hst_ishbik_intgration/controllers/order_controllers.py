@@ -163,7 +163,6 @@ class OrderIntegration(http.Controller):
         try:
             order_id = pos_order['result'][0]['id']
             message_payload = {
-                'type': 'custom_alert',
                 'title': 'New Ishbic Order',
                 'message': f"New API order #{order_id} from {order.get('source', {}).get('name', 'Unknown')}",
                 'level': 'info',
@@ -171,6 +170,7 @@ class OrderIntegration(http.Controller):
             request.env['bus.bus']._sendmany([
                 (
                     "pos.custom.notification",
+                    "custom_alert",
                     message_payload,
                 )
             ])
