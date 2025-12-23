@@ -26,6 +26,7 @@
         'point_of_sale._assets_pos': [
             'hst_ishbik_intgration/static/src/css/pos.css',
             'hst_ishbik_intgration/static/src/css/datetime.css',
+            'hst_ishbik_intgration/static/src/js/pos_bus_notification.js',
             'hst_ishbik_intgration/static/src/js/model.js',
             'hst_ishbik_intgration/static/src/js/Orderlinenote.js',
             'hst_ishbik_intgration/static/src/js/CallOrderLine.js',

@@ -158,10 +158,29 @@ class OrderIntegration(http.Controller):
             })
         
         pos_order = request.env['pos.call.order'].create_pos_call_order(request.env['pos.call.order']._order_fields(order))
-        
+
+        # Send real-time notification to POS via bus when an API order is created
+        try:
+            order_id = pos_order['result'][0]['id']
+            message_payload = {
+                'type': 'custom_alert',
+                'title': 'New Ishbic Order',
+                'message': f"New API order #{order_id} from {order.get('source', {}).get('name', 'Unknown')}",
+                'level': 'info',
+            }
+            request.env['bus.bus']._sendmany([
+                (
+                    "pos.custom.notification",
+                    message_payload,
+                )
+            ])
+        except Exception as e:
+            # Do not block API if notification fails; just log it
+            self.logger.exception("Failed to send POS bus notification: %s", e)
+
         res = {
         'ishbic_order_id': order['id'],
-        'odoo_order_id': pos_order['result'][0]['id'],
+        'odoo_order_id': order_id,
         'storeId': order['storeId'],
         'placedAt': order['placedAt'],
         'source':order['source'],
